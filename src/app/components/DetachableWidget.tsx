@@ -35,7 +35,7 @@ export function DetachableWidget({
   const openDetached = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    const w = window.open(`/standalone/${widgetId}`, "_blank", "noopener,noreferrer");
+    const w = window.open(`${import.meta.env.BASE_URL}#/standalone/${widgetId}`, "_blank", "noopener,noreferrer");
     w?.focus();
   };
 

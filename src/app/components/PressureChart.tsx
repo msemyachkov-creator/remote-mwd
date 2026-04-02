@@ -306,7 +306,7 @@ export function PressureChart({
         >
           {simTimeLabel}
           <button
-            onClick={() => window.open("/standalone/pressure", "_blank", "width=1000,height=500")}
+            onClick={() => window.open(`${import.meta.env.BASE_URL}#/standalone/pressure`, "_blank", "width=1000,height=500")}
             className="p-1 rounded hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
             title="Open in separate window"
           >

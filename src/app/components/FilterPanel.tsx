@@ -79,7 +79,7 @@ export function FilterPanel() {
               </button>
             )}
             <button
-              onClick={() => window.open("/standalone/filters", "_blank", "width=600,height=500")}
+              onClick={() => window.open(`${import.meta.env.BASE_URL}#/standalone/filters`, "_blank", "width=600,height=500")}
               className="p-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded transition-colors cursor-pointer"
               title="Open in separate window"
             >

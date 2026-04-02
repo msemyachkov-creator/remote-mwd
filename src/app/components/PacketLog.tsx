@@ -358,7 +358,7 @@ export function PacketLog({ mwdData, onNavigateToFrame }: PacketLogProps) {
           ))}
           <div className="flex-1" />
           <button
-            onClick={() => window.open("/standalone/log", "_blank", "width=450,height=800")}
+            onClick={() => window.open(`${import.meta.env.BASE_URL}#/standalone/log`, "_blank", "width=450,height=800")}
             className="p-1.5 mr-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded transition-colors cursor-pointer"
             title="Open in separate window"
           >

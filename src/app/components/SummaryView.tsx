@@ -17,7 +17,7 @@ function detachAction(widgetId: string, label: string) {
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        const w = window.open(`/standalone/${widgetId}`, "_blank", "noopener,noreferrer");
+        const w = window.open(`${import.meta.env.BASE_URL}#/standalone/${widgetId}`, "_blank", "noopener,noreferrer");
         w?.focus();
       }}
       className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-primary/30 bg-background/80 backdrop-blur-sm transition-all hover:bg-primary/15 hover:border-primary/60"

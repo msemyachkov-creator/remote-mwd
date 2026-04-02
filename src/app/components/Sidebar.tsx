@@ -308,7 +308,7 @@ export function Sidebar({ activePage, onPageChange }: SidebarProps) {
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              const w = window.open(`/rig/${rig.id}`, "_blank", "noopener,noreferrer");
+                              const w = window.open(`${import.meta.env.BASE_URL}#/rig/${rig.id}`, "_blank", "noopener,noreferrer");
                               w?.focus();
                             }}
                             className="opacity-0 group-hover:opacity-100 flex items-center justify-center size-4 rounded hover:bg-primary/20 transition-all shrink-0"

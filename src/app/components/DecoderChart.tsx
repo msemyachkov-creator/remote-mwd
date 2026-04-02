@@ -639,7 +639,7 @@ export function DecoderChart({
         >
           {simTimeLabel}
           <button
-            onClick={() => window.open("/standalone/decoder", "_blank", "width=1000,height=600")}
+            onClick={() => window.open(`${import.meta.env.BASE_URL}#/standalone/decoder`, "_blank", "width=1000,height=600")}
             className="p-1 rounded hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
             title="Open in separate window"
           >

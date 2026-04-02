@@ -523,7 +523,7 @@ export function SpectrogramView({ isPlaying, currentSimTimeMs, scrollOffset, zoo
         <span className="mwd-cell text-muted-foreground flex items-center gap-2">
           {fmtMs(currentSimTimeMs)}
           <button
-            onClick={() => window.open("/standalone/spectrogram", "_blank", "width=800,height=400")}
+            onClick={() => window.open(`${import.meta.env.BASE_URL}#/standalone/spectrogram`, "_blank", "width=800,height=400")}
             className="p-1 rounded hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
             title="Open in separate window"
           >
