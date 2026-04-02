@@ -1,0 +1,401 @@
+import React from "react";
+import { useI18n } from "../i18n";
+import { useWell } from "../WellContext";
+import { PolarChartWidget } from "../PolarChartWidget";
+
+interface GaugeCircleProps {
+  label: string;
+  value: number;
+  unit?: string;
+  max?: number;
+  colorClass?: string;
+  size?: number;
+}
+
+// ─── Figma asset URLs (grid + dots) ─────────────────────────────────────────
+const GRID_WITH_LINE      = "https://www.figma.com/api/mcp/asset/eaf924e2-2fd9-4d1d-87f9-fa2eee51fd86";
+const GRID_WITH_LINE_AXIS = "https://www.figma.com/api/mcp/asset/e9987083-e05d-43cc-baa2-cd992500a805";
+const GRID_NO_LINE        = "https://www.figma.com/api/mcp/asset/07c5a9d3-a747-4920-95e0-f59939475f8e";
+// Dot images: index 0 = largest (ring 1), index 3 = smallest (ring 4)
+const DOT_IMGS = [
+  "https://www.figma.com/api/mcp/asset/9310e577-9c83-4ee5-bc34-ac93ae98ad77", // 10px – bright blue
+  "https://www.figma.com/api/mcp/asset/e9dd0cb7-d119-4172-a05f-8bf07a628372", // 8px
+  "https://www.figma.com/api/mcp/asset/ee6d03e5-e044-4b84-a2b3-0ca6817a9870", // 6px
+  "https://www.figma.com/api/mcp/asset/36d375dd-fb77-40b9-945a-4c6a3838b0df", // 4px
+];
+
+// Minor tick angles (5° step, skip every 30°)
+const MINOR_ANGLES = [
+  5,10,20,25,35,40,50,55,65,70,80,85,
+  95,100,110,115,125,130,140,145,155,160,170,175,
+  -165,-135,-105,-75,-45,-15,
+];
+
+// Major grid lines with axis/degree labels (from Figma 5-dot variant)
+// topLabel = label at the "top" of the element (before rotation is applied)
+// After rotate(0°):   top = 12 o'clock (HS), bottom = 6 o'clock (LS)
+// After rotate(90°):  top → 3 o'clock (90R),  bottom → 9 o'clock (90L)
+// After rotate(-60°): top → ~10 o'clock (-60°), bottom → ~4 o'clock (120°)
+const MAJOR_LINE_DATA = [
+  { deg: -60, topLabel: "-60",  botLabel: "120",  isAxis: false },
+  { deg: -30, topLabel: "-30",  botLabel: "150",  isAxis: false },
+  { deg:   0, topLabel: "HS",   botLabel: "LS",   isAxis: true  },
+  { deg:  30, topLabel: "30",   botLabel: "-150", isAxis: false },
+  { deg:  60, topLabel: "60",   botLabel: "-120", isAxis: false },
+  { deg:  90, topLabel: "90R",  botLabel: "90L",  isAxis: true  },
+];
+
+function GaugeCircle({ label, value, unit = "°", max = 360, colorClass = "bg-primary", size = 360 }: GaugeCircleProps) {
+  const s = size / 184; // scale from Figma base 184px
+  const borderPx = Math.round(8 * s / 3);
+  // Dot starts at 9-o'clock. +90° maps 0° (North) → 12-o'clock.
+  const angle = (value / max) * 360;
+  const rot0 = angle + 90;   // ring 1 base rotation
+
+  // Inner dark circle touches the inner end of the axis lines (= inner label chip edge).
+  // The 3 indicator rings are evenly spaced inside it.
+  // Gap: dark_edge→ring0 = ring0→ring1 = ring1→ring2 = ring2→center = d
+  const lhPxNonAxis = Math.round(14 * size / 256);
+  const rInnerLabel = size / 2 - borderPx - lhPxNonAxis - 2;
+  const d = rInnerLabel / 4;
+  // Rendered in DOM order (first = behind): dark bg circle first, then indicator rings on top
+  const rings = [
+    { radius: rInnerLabel, dotSize:  4, dotImgIdx: 3, isBlue: false, offset: 13, bg: "#1f2d3d"     },
+    { radius: 3 * d,       dotSize: 10, dotImgIdx: 0, isBlue: true,  offset:  0, bg: "transparent" },
+    { radius: 2 * d,       dotSize:  8, dotImgIdx: 1, isBlue: false, offset: 15, bg: "transparent" },
+    { radius: 1 * d,       dotSize:  6, dotImgIdx: 2, isBlue: false, offset:  8, bg: "transparent" },
+  ];
+
+  return (
+    <div
+      className="relative shrink-0 overflow-hidden"
+      style={{
+        width: size, height: size,
+        borderRadius: "50%",
+        backgroundColor: "#192838",
+        border: `${borderPx}px solid #1f2d3d`,
+        flexShrink: 0,
+      }}
+    >
+      {/* ── GRID: 6 labeled major lines every 30° ── */}
+      {MAJOR_LINE_DATA.map(({ deg, topLabel, botLabel, isAxis }) => {
+        const img      = isAxis ? GRID_WITH_LINE_AXIS : GRID_WITH_LINE;
+        const ref      = 256; // Figma 5-dot reference circle size
+        const fontSz   = Math.round((isAxis ? 12 : 10) * size / ref);
+        const lhPx     = Math.round((isAxis ? 16 : 14) * size / ref);
+        const gapPx    = (isAxis ? 2 : 3) * size / ref;
+        const padX     = 2 * size / ref;
+        const lW       = (isAxis ? 40 : 36) * size / ref;
+        const lineH    = 216 * size / ref;
+        const color    = isAxis ? "#E8EBF0" : "rgba(191,201,212,0.7)";
+        const totalH   = 2 * lhPx + lineH + 2 * gapPx;
+
+        const absRad = Math.abs(deg) * Math.PI / 180;
+        const sinA   = Math.abs(Math.sin(absRad));
+        const cosA   = Math.abs(Math.cos(absRad));
+        const boxW   = Math.max(totalH * sinA + lW * cosA, 1);
+        const boxH   = Math.max(totalH * cosA + lW * sinA, 1);
+
+        // Label chip positions: 2px inset from inner edge of the border
+        const chipR = size / 2 - borderPx - lhPx / 2 - 2;
+        const degRad = deg * Math.PI / 180;
+        const xTop =  chipR * Math.sin(degRad);
+        const yTop = -chipR * Math.cos(degRad);
+        const xBot = -chipR * Math.sin(degRad);
+        const yBot =  chipR * Math.cos(degRad);
+
+        const chipStyle = (x: number, y: number): React.CSSProperties => ({
+          position: "absolute",
+          left: "50%", top: "50%",
+          marginLeft: x - lW / 2,
+          marginTop: y - lhPx / 2,
+          width: lW, height: lhPx,
+          background: "#1f2d3d",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transform: `rotate(${deg}deg)`,
+          padding: `0 ${padX}px`,
+          zIndex: 20,
+        });
+
+        return (
+          <React.Fragment key={deg}>
+            {/* Line image only (no label chips here — chips rendered at front below) */}
+            <div style={{
+              position: "absolute", top: "50%", left: "50%",
+              width: boxW, height: boxH,
+              marginLeft: -boxW / 2, marginTop: -boxH / 2,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <div style={{ transform: `rotate(${deg}deg)`, flexShrink: 0 }}>
+                <div style={{ position: "relative", width: 0, height: `${lineH}px`, flexShrink: 0 }}>
+                  <div style={{ position: "absolute", inset: "0 -0.5px" }}>
+                    <img src={img} alt="" style={{ display: "block", width: "100%", height: "100%", maxWidth: "none" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Label chips rendered separately so they can be layered above dots */}
+            <div style={chipStyle(xTop, yTop)}>
+              <span style={{ fontSize: fontSz, color, lineHeight: `${lhPx}px`, fontFamily: "var(--font-family-base)", whiteSpace: "nowrap" }}>
+                {topLabel}
+              </span>
+            </div>
+            <div style={chipStyle(xBot, yBot)}>
+              <span style={{ fontSize: fontSz, color, lineHeight: `${lhPx}px`, fontFamily: "var(--font-family-base)", whiteSpace: "nowrap" }}>
+                {botLabel}
+              </span>
+            </div>
+          </React.Fragment>
+        );
+      })}
+
+      {/* ── GRID: minor ticks every 5° ── */}
+      {MINOR_ANGLES.map((deg) => {
+        const rad = Math.abs(deg) * Math.PI / 180;
+        const boxW = size * Math.abs(Math.sin(rad)) || 1;
+        const boxH = size * Math.abs(Math.cos(rad)) || size;
+        return (
+          <div key={deg} style={{
+            position: "absolute", top: "50%", left: "50%",
+            width: Math.max(boxW, 1), height: boxH,
+            marginLeft: -Math.max(boxW, 1) / 2,
+            marginTop:  -boxH / 2,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{ transform: `rotate(${deg}deg)`, flexShrink: 0 }}>
+              <div style={{ position: "relative", width: 0, height: size }}>
+                <div style={{ position: "absolute", inset: "0 -0.5px" }}>
+                  <img src={GRID_NO_LINE} alt="" style={{ display: "block", width: "100%", height: "100%", maxWidth: "none" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* ── DOTS: 4 concentric rings ── */}
+      {rings.map((ring, i) => {
+        const rPx  = ring.radius * 2;   // diameter in px (already at actual widget scale)
+        const dPx  = ring.dotSize / 2 * s;
+        const cPx  = 12 * s;       // dot container (Figma: 12px)
+        const lPx  = -6.5 * s;    // Figma: left-[-6.5px]
+        const rot  = rot0 + ring.offset;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              width: rPx, height: rPx,
+              top: "50%", left: "50%",
+              marginTop: -rPx / 2, marginLeft: -rPx / 2,
+              borderRadius: "50%",
+              border: "0.25px solid rgba(255,255,255,0.12)",
+              backgroundColor: ring.bg,
+              transform: `rotate(${rot}deg)`,
+              transition: "transform 0.7s ease-out",
+            }}
+          >
+            {/* Dot container: size-[12px], left-[-6.5px], top-1/2, -translate-y-1/2 */}
+            <div style={{
+              position: "absolute",
+              width: cPx, height: cPx,
+              left: lPx, top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <div style={{ position: "relative", width: dPx, height: dPx, flexShrink: 0 }}>
+                <div style={{ position: "absolute", inset: `${-(ring.isBlue ? 10 : 5)/dPx * 100}%` }}>
+                  <img src={DOT_IMGS[ring.dotImgIdx]} alt="" style={{ display: "block", width: "100%", height: "100%", maxWidth: "none" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* ── CENTER VALUE ── */}
+      <div
+        style={{
+          position: "absolute", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", textAlign: "center",
+          zIndex: 10,
+          paddingBottom: Math.round(2 * s),
+          width: Math.round(84 * s),
+        }}
+      >
+        <p style={{ fontSize: Math.round(9 * s), color: "#E8EBF0", lineHeight: `${Math.round(12 * s)}px`, fontFamily: "var(--font-family-base)", fontWeight: 400, margin: 0 }}>
+          {label}
+        </p>
+        <p style={{ fontSize: Math.round(10.5 * s), color: "#209EF8", fontWeight: 600, lineHeight: `${Math.round(15 * s)}px`, fontFamily: "var(--font-family-base)", margin: 0 }}>
+          {value.toFixed(1)}<span style={{ fontWeight: 400 }}>{unit}</span>
+        </p>
+        <p style={{ fontSize: Math.round(7.5 * s), color: "rgba(191,201,212,0.55)", lineHeight: `${Math.round(10.5 * s)}px`, fontFamily: "var(--font-family-base)", margin: 0 }}>
+          00:56
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface NumeralWidgetProps {
+  label: string;
+  value: number;
+  unit: string;
+  decimals?: number;
+}
+
+function NumeralWidget({ label, value, unit, decimals = 2 }: NumeralWidgetProps) {
+  return (
+    <div
+      className="flex-1 flex items-center gap-2 px-4 py-3 bg-secondary/30 border border-border/30 rounded"
+      style={{ borderRadius: "var(--radius)" }}
+    >
+      <span
+        className="text-foreground/70 shrink-0"
+        style={{ fontSize: "10px", fontFamily: "var(--font-family-base)", fontWeight: "var(--font-weight-medium)" }}
+      >
+        {label}
+      </span>
+      <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "19px" }}>
+        {value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+      </span>
+      <span className="text-muted-foreground shrink-0" style={{ fontSize: "9px", fontFamily: "var(--font-family-base)" }}>
+        {unit}
+      </span>
+    </div>
+  );
+}
+
+function StatusBadge({ children, color }: { children: React.ReactNode; color?: string }) {
+  return (
+    <div
+      className="flex items-center gap-1.5 px-2.5 py-2 border rounded shrink-0"
+      style={{ borderColor: color ? `${color}40` : "var(--border)", borderRadius: "var(--radius)" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ToolfaceWidget() {
+  const { t } = useI18n();
+  const { activeWell } = useWell();
+  const [activeGauge, setActiveGauge] = React.useState<"gtf" | "mtf">("gtf");
+
+  const { gtf: gtfValue, inc: incValue, azm: azmValue, gamma: grValue, pressure: sppValue, temp: tempValue } = activeWell;
+  const mtfValue = parseFloat(((gtfValue + 137) % 360).toFixed(1));
+  const ropValue = 13.7;
+  const syncAcquired = true;
+  const pumpsOn = activeWell.status === "active";
+  const circTime = "0:01:42";
+  const lastPkt = "4s ago";
+  const pw = 0.375;
+
+  const gaugeAngle = activeGauge === "gtf" ? gtfValue : mtfValue;
+  const gaugeLabel = activeGauge === "gtf" ? t("sum_gtf") : t("sum_mtf");
+
+  const bField = (52000 + (activeWell.seed % 100) * 10).toFixed(0);
+  const dip    = (64 + (activeWell.seed % 50) / 10).toFixed(1);
+  const gField = "1.000";
+  const envTemp = activeWell.temp.toFixed(1);
+
+  const tabBase = "px-[18px] py-[6px] text-[15px] font-bold tracking-widest uppercase transition-colors";
+  const tabActive = "bg-primary/25 text-primary";
+  const tabInactive = "text-primary/40 hover:bg-primary/10 hover:text-primary/60";
+
+  return (
+    <div className="flex-1 flex flex-col p-3 gap-0.5 bg-background relative overflow-hidden select-none">
+      <div className="absolute inset-0 bg-radial-[circle_at_center,_var(--color-primary)_0%,_transparent_70%] opacity-[0.02] pointer-events-none" />
+
+      {/* TOP ROW — compact numerals */}
+      <div className="shrink-0 flex items-stretch gap-[20px] z-10">
+        <div className="flex items-center gap-2 px-4 py-3 border border-border/20 bg-background/60 rounded shrink-0" style={{ borderRadius: "var(--radius)" }}>
+          <div className={`size-1.5 rounded-full animate-pulse ${activeWell.status === "active" ? "bg-accent" : activeWell.status === "standby" ? "bg-chart-3" : "bg-foreground/20"}`} />
+          <span className="text-[10px] font-bold text-foreground/50 tracking-widest uppercase">
+            {activeWell.status === "active" ? "DRILLING" : activeWell.status === "standby" ? "STANDBY" : "OFFLINE"}
+          </span>
+        </div>
+        <NumeralWidget label="ROP" value={ropValue} unit="m/h" decimals={1} />
+        <NumeralWidget label="GR"  value={grValue}  unit="API" decimals={1} />
+        <NumeralWidget label="SPP" value={sppValue} unit="PSI" decimals={0} />
+      </div>
+
+      {/* MIDDLE — flex row: left col | 40px gap | gauge | 40px gap | right col */}
+      <div className="flex-1 flex items-center min-h-0 relative">
+
+        {/* Status badges — left column */}
+        <div className="flex flex-col gap-[20px] w-[213px] shrink-0 ml-2 z-10">
+          <div className={`flex items-center gap-2 px-3 py-2 border rounded text-[13px] font-bold tracking-widest uppercase w-full ${syncAcquired ? "border-accent/40 text-accent" : "border-destructive/40 text-destructive"}`} style={{ borderRadius: "var(--radius)" }}>
+            <span className={`size-2 rounded-full shrink-0 ${syncAcquired ? "bg-accent animate-pulse" : "bg-destructive"}`} />
+            {syncAcquired ? "SYNC ACQUIRED" : "NO SYNC"}
+          </div>
+          <div className={`flex items-center gap-2 px-3 py-2 border rounded text-[13px] font-bold tracking-widest uppercase w-full ${pumpsOn ? "border-chart-3/40 text-chart-3" : "border-border/40 text-foreground/40"}`} style={{ borderRadius: "var(--radius)" }}>
+            <span className={`size-2 rounded-full shrink-0 ${pumpsOn ? "bg-chart-3 animate-pulse" : "bg-foreground/20"}`} />
+            {pumpsOn ? "PUMPS ON" : "PUMPS OFF"}
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>Circ: {circTime}</div>
+          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>Last: {lastPkt}</div>
+          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>PW: {pw}</div>
+        </div>
+
+        {/* 40px gap left */}
+        <div className="w-10 shrink-0" />
+
+        {/* Gauge — fills remaining space */}
+        <div className="flex-1 relative min-h-0 self-stretch">
+          <div className="absolute inset-0">
+            <PolarChartWidget label={gaugeLabel} gtfAngle={gaugeAngle} gtfValue={gaugeAngle} timestamp="00:56" />
+          </div>
+        </div>
+
+        {/* 40px gap right */}
+        <div className="w-10 shrink-0" />
+
+        {/* Tab switcher — absolute top-right of middle block */}
+        <div className="absolute top-[20px] right-2 z-20 flex border border-primary/30 rounded overflow-hidden bg-primary/5">
+          <button className={`${tabBase} ${activeGauge === "gtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("gtf")}>GTF</button>
+          <div className="w-px bg-primary/20 self-stretch" />
+          <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
+        </div>
+
+        {/* Environment widgets — right column */}
+        <div className="flex flex-col gap-[20px] w-[235px] shrink-0 mr-2 z-10">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
+            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>B Field</span>
+            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{bField}</span>
+            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>nT</span>
+          </div>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
+            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>Dip</span>
+            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{dip}</span>
+            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>°</span>
+          </div>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
+            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>G Field</span>
+            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{gField}</span>
+            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>g</span>
+          </div>
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
+            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>Temp</span>
+            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{envTemp}</span>
+            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>°C</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* BOTTOM ROW — compact numerals */}
+      <div className="shrink-0 flex items-stretch gap-[20px] z-10">
+        <div className="flex items-center gap-2 px-4 py-3 border border-border/20 bg-background/60 rounded shrink-0" style={{ borderRadius: "var(--radius)" }}>
+          <div className="size-1.5 rounded-full bg-accent animate-pulse" />
+          <span className="text-[10px] font-bold text-foreground/50 tracking-widest uppercase">REAL-TIME</span>
+        </div>
+        <NumeralWidget label={t("sum_azm")} value={azmValue}  unit="°"  decimals={2} />
+        <NumeralWidget label={t("sum_inc")} value={incValue}  unit="°"  decimals={2} />
+        <NumeralWidget label="TEMP"         value={tempValue} unit="°C" decimals={1} />
+      </div>
+    </div>
+  );
+}

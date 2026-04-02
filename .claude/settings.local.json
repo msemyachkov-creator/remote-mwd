@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src\" -type f)",
+      "Bash(npm install:*)",
+      "Bash(ls -la \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/components\" -name \"HeaderBar.tsx\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/components\" -name \"WorkSettings.tsx\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)\" -name \"MainContent.tsx\" -o -name \"SurfaceUnitSettings.tsx\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)\" -name \"TelesystemConfig.tsx\")",
+      "Bash(wc -l \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/components/SurfaceUnitSettings.tsx\")",
+      "Bash(head -150 \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/components/SurfaceUnitSettings.tsx\")",
+      "mcp__e5081aad-4ddd-46e8-aebb-987493d9f05b__use_figma",
+      "mcp__Claude_Preview__preview_start",
+      "Read(//Users/uiux/.nvm/versions/node/v18.20.8/bin/**)",
+      "Bash(ls \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/node_modules/.bin/vite\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src\" -type f -name \"*.tsx\")",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src\" -type f \\\\\\( -name \"*PulseView*\" -o -name \"*Decoder*\" -o -name \"*Decoding*\" \\\\\\))",
+      "Bash(find \"/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src\" -type d -name \"summary\" -o -type d -name \"decoder\")",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type f -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\")",
+      "Bash(ls -la '/Users/uiux/Downloads/Remote MWD \\(Extended\\)/src/app/')",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type d)",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type f \\\\\\( -name \"*store*\" -o -name \"*context*\" -o -name \"*reducer*\" -o -name \"*hook*\" -o -name \"*data*\" \\\\\\))",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type f \\\\\\( -name \"*api*\" -o -name \"*fetch*\" -o -name \"*service*\" \\\\\\))",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type f -name \"*Context*\" -o -name \"*context*\")",
+      "Bash(ls -la /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src/app/components/)",
+      "Bash(find /Users/uiux/Downloads/\"Remote MWD \\(Extended\\)\"/src -type f -name \"*.tsx\" -o -name \"*.ts\")",
+      "Bash(/tmp/tree_output.txt:*)",
+      "Read(//tmp/**)",
+      "Bash(node -e \"const icons = require\\(''lucide-react''\\); const names = Object.keys\\(icons\\).filter\\(k => k.toLowerCase\\(\\).includes\\(''rename''\\) || k.toLowerCase\\(\\).includes\\(''pencil''\\) || k.toLowerCase\\(\\).includes\\(''tag''\\) || k.toLowerCase\\(\\).includes\\(''label''\\) || k.toLowerCase\\(\\).includes\\(''badge''\\)\\); console.log\\(names.join\\(''\\\\n''\\)\\)\")",
+      "Bash(node -e \"const icons = require\\(''lucide-react''\\); const names = Object.keys\\(icons\\).filter\\(k => !k.startsWith\\(''Lucide''\\) && !k.endsWith\\(''Icon''\\) && \\(k.toLowerCase\\(\\).includes\\(''square''\\) || k.toLowerCase\\(\\).includes\\(''cursor''\\) || k.toLowerCase\\(\\).includes\\(''text''\\) || k.toLowerCase\\(\\).includes\\(''input''\\) || k.toLowerCase\\(\\).includes\\(''type''\\)\\)\\).sort\\(\\); console.log\\(names.join\\(''\\\\n''\\)\\)\")"
+    ]
+  }
+}
