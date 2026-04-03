@@ -508,9 +508,11 @@ function MWDAppContent({ lang, onLangChange }: { lang: Lang; onLangChange: (l: L
             />
           </div>
           {showReportModal && <ReportModal onClose={() => setShowReportModal(false)} />}
-          <div className="shrink-0">
-            <AlertPanel />
-          </div>
+          {activePage !== "summary" && (
+            <div className="shrink-0">
+              <AlertPanel />
+            </div>
+          )}
 
           {activePage === "data" ? (
             <div className="flex-1 min-h-0 overflow-hidden">

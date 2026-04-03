@@ -7,7 +7,62 @@ interface SurfaceUnitSettingsProps {
   onClose?: () => void;
 }
 
-type TabId = "port-selection" | "connect" | "status" | "firmware";
+function SensorRow({
+  label,
+  value,
+  onChange,
+  unit,
+  checked,
+  onCheck,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  unit: string;
+  checked?: boolean;
+  onCheck?: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 py-[3px]" style={{ fontFamily: "var(--font-family-base)" }}>
+      {/* Checkbox or spacer */}
+      {onCheck !== undefined ? (
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onCheck(e.target.checked)}
+          className="size-3.5 accent-primary shrink-0"
+        />
+      ) : (
+        <span className="size-3.5 shrink-0" />
+      )}
+      {/* Label */}
+      <span
+        className="text-sm shrink-0"
+        style={{
+          width: "160px",
+          color: onCheck !== undefined ? (checked ? "var(--foreground)" : "var(--foreground)") : "var(--foreground)",
+          opacity: onCheck !== undefined ? (checked ? 1 : 0.55) : 0.6,
+        }}
+      >
+        {label}
+      </span>
+      {/* Input */}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-7 px-2 bg-input-background border border-border rounded text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+        style={{ width: "140px", fontFamily: "var(--font-family-mono)", borderRadius: "var(--radius)" }}
+      />
+      {/* Unit */}
+      {unit && (
+        <span className="text-sm text-foreground/45 shrink-0">{unit}</span>
+      )}
+    </div>
+  );
+}
+
+type TabId = "port-selection" | "connect";
 
 export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
   const { t } = useI18n();
@@ -92,10 +147,8 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
           style={{ backgroundColor: "var(--sidebar)" }}
         >
           {([
-            { id: "port-selection" as TabId, label: "Port Selection",       value: port,                              valueColor: "text-primary" },
-            { id: "connect"        as TabId, label: "Connect / Disconnect",  value: isConnected ? "Connected" : "Disconnected", valueColor: isConnected ? "text-chart-2" : "text-destructive" },
-            { id: "status"         as TabId, label: "Status",                value: status,                            valueColor: "text-chart-2"  },
-            { id: "firmware"       as TabId, label: "Firmware Version",      value: firmwareVersion,                   valueColor: "text-foreground/70" },
+            { id: "port-selection" as TabId, label: "Port Selection",       value: port,                                       valueColor: "text-primary" },
+            { id: "connect"        as TabId, label: "Connect / Disconnect", value: isConnected ? "Connected" : "Disconnected", valueColor: isConnected ? "text-chart-2" : "text-destructive" },
           ]).map((tab) => (
             <button
               key={tab.id}
@@ -135,11 +188,11 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
 
               <div className="border border-border rounded bg-secondary/5" style={{ borderRadius: "var(--radius)" }}>
                 {[
-                  { name: "COM3", type: "USB Serial",    desc: "USB-SERIAL CH340"    },
-                  { name: "COM4", type: "USB Serial",    desc: "USB-SERIAL FTDI"     },
-                  { name: "COM5", type: "Native Serial", desc: "Ground Unit MWD"     },
-                  { name: "COM6", type: "USB Serial",    desc: "USB-SERIAL CP210x"   },
-                  { name: "COM7", type: "USB Serial",    desc: "Bluetooth COM Port"  },
+                  { name: "COM3", type: "USB Serial",    desc: "USB-SERIAL CH340"   },
+                  { name: "COM4", type: "USB Serial",    desc: "USB-SERIAL FTDI"    },
+                  { name: "COM5", type: "Native Serial", desc: "Ground Unit MWD"    },
+                  { name: "COM6", type: "USB Serial",    desc: "USB-SERIAL CP210x"  },
+                  { name: "COM7", type: "USB Serial",    desc: "Bluetooth COM Port" },
                 ].map((p) => (
                   <button
                     key={p.name}
@@ -161,37 +214,6 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
                 ))}
               </div>
 
-              <div className="border border-border rounded p-4 bg-secondary/5 flex flex-col gap-3" style={{ borderRadius: "var(--radius)" }}>
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">Port Settings</span>
-                {[
-                  { label: "Baud Rate",      value: "115200" },
-                  { label: "Data Bits",      value: "8" },
-                  { label: "Stop Bits",      value: "1" },
-                  { label: "Parity",         value: "None" },
-                  { label: "Flow Control",   value: "None" },
-                  { label: "Read Timeout",   value: "500 ms" },
-                  { label: "Write Timeout",  value: "500 ms" },
-                ].map((r, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-sm text-foreground/60" style={{ fontFamily: "var(--font-family-base)" }}>{r.label}</span>
-                    <span className="text-sm text-foreground font-medium font-mono">{r.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border border-border rounded p-4 bg-secondary/5 flex flex-col gap-3" style={{ borderRadius: "var(--radius)" }}>
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">Options</span>
-                {[
-                  { label: "Auto-detect port on startup" },
-                  { label: "Remember last used port" },
-                  { label: "Show unavailable ports" },
-                ].map((o, i) => (
-                  <label key={i} className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" defaultChecked={i < 2} className="size-4 accent-primary" />
-                    <span className="text-sm text-foreground/70" style={{ fontFamily: "var(--font-family-base)" }}>{o.label}</span>
-                  </label>
-                ))}
-              </div>
             </div>
           )}
 
@@ -273,44 +295,18 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
                 ))}
               </div>
 
-              <div className="border border-border rounded p-4 bg-secondary/5 flex flex-col gap-2" style={{ borderRadius: "var(--radius)" }}>
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest mb-1">Connection Log</span>
-                {[
-                  { t: time,                   msg: "Connected to " + port, ok: true  },
-                  { t: "19-03-2026 09:12:44",  msg: "Disconnected",         ok: false },
-                  { t: "19-03-2026 09:10:11",  msg: "Connected to COM5",    ok: true  },
-                  { t: "19-03-2026 08:55:03",  msg: "Auto-reconnect failed — retry 3/10", ok: false },
-                  { t: "19-03-2026 08:54:58",  msg: "Connected to COM5",    ok: true  },
-                ].map((e, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <span className={`size-1.5 rounded-full mt-1.5 shrink-0 ${e.ok ? "bg-chart-2" : "bg-destructive"}`} />
-                    <span className="text-xs text-foreground font-medium" style={{ fontFamily: "var(--font-family-base)" }}>{e.msg}</span>
-                    <span className="text-xs text-foreground/40 font-mono ml-auto whitespace-nowrap">{e.t}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── STATUS ── */}
-          {activeTab === "status" && (
-            <div className="p-6 flex flex-col gap-5 max-w-2xl">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">Status</span>
-                <span className="text-sm text-foreground/70">Current Ground Unit state and sensor readings.</span>
-              </div>
-
+              {/* Status info */}
               <div className="border border-border rounded p-4 bg-secondary/5" style={{ borderRadius: "var(--radius)" }}>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
                   {[
-                    { label: "Port",         value: port,        color: "text-primary" },
-                    { label: "Ground Unit",  value: isConnected ? "Connected" : "Disconnected", color: isConnected ? "text-chart-2" : "text-destructive" },
-                    { label: "Status",       value: status,      color: "text-chart-2" },
-                    { label: "State",        value: state,       color: "text-foreground/70" },
-                    { label: "Link",         value: linkStatus,  color: "text-chart-2" },
-                    { label: "Uptime",       value: "4h 23m",    color: "text-foreground/70" },
-                    { label: "Temperature",  value: "42 °C",     color: "text-foreground/70" },
-                    { label: "Supply Voltage", value: "12.1 V",  color: "text-chart-2" },
+                    { label: "Port",           value: port,                                              color: "text-primary" },
+                    { label: "Ground Unit",    value: isConnected ? "Connected" : "Disconnected",        color: isConnected ? "text-chart-2" : "text-destructive" },
+                    { label: "Status",         value: status,                                            color: "text-chart-2" },
+                    { label: "State",          value: state,                                             color: "text-foreground/70" },
+                    { label: "Link",           value: linkStatus,                                        color: "text-chart-2" },
+                    { label: "Uptime",         value: "4h 23m",                                         color: "text-foreground/70" },
+                    { label: "Temperature",    value: "42 °C",                                          color: "text-foreground/70" },
+                    { label: "Supply Voltage", value: "12.1 V",                                         color: "text-chart-2" },
                   ].map((r, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <span className="text-sm text-foreground/60 w-36" style={{ fontFamily: "var(--font-family-base)" }}>{r.label}</span>
@@ -320,6 +316,7 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
                 </div>
               </div>
 
+              {/* Time */}
               <div className="flex items-center gap-3">
                 <label className="text-sm text-foreground/60 w-32" style={{ fontFamily: "var(--font-family-base)" }}>Time</label>
                 <input
@@ -331,54 +328,16 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
                 />
               </div>
 
-              <div className="border border-border rounded p-4 bg-secondary/5 flex flex-col gap-2" style={{ borderRadius: "var(--radius)" }}>
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest mb-1">Packet Statistics</span>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { label: "Received",  value: "14 823", color: "text-chart-2" },
-                    { label: "Sent",      value: "14 801", color: "text-chart-2" },
-                    { label: "Errors",    value: "0",      color: "text-foreground/60" },
-                    { label: "CRC Errors",value: "2",      color: "text-yellow-500" },
-                    { label: "Timeouts",  value: "1",      color: "text-yellow-500" },
-                    { label: "Retries",   value: "3",      color: "text-foreground/60" },
-                  ].map((s, i) => (
-                    <div key={i} className="flex flex-col gap-0.5">
-                      <span className="text-xs text-foreground/40" style={{ fontFamily: "var(--font-family-base)" }}>{s.label}</span>
-                      <span className={`text-sm font-bold font-mono ${s.color}`}>{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border border-border rounded p-4 bg-secondary/5 flex flex-col gap-3" style={{ borderRadius: "var(--radius)" }}>
-                <span className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">Sensor Readings</span>
-                {[
-                  { label: "Encoder",           value: encoderValue,      unit: "counts №4", enabled: encoderEnabled,       setEnabled: setEncoderEnabled,       setValue: setEncoderValue },
-                  { label: "Hook Load",          value: hookLoadValue,     unit: "mA №3",     enabled: hookLoadEnabled,       setEnabled: setHookLoadEnabled,      setValue: setHookLoadValue },
-                  { label: "Pressure №1",        value: pressure1Value,    unit: "mA",        enabled: pressure1Enabled,      setEnabled: setPressure1Enabled,     setValue: setPressure1Value },
-                  { label: "Pressure №2",        value: pressure2Value,    unit: "mA",        enabled: pressure2Enabled,      setEnabled: setPressure2Enabled,     setValue: setPressure2Value },
-                  { label: "Pump Strokes №1",    value: pump1StrokesValue, unit: "Hz",        enabled: pump1StrokesEnabled,   setEnabled: setPump1StrokesEnabled,  setValue: setPump1StrokesValue },
-                  { label: "Pump Strokes №2",    value: pump2StrokesValue, unit: "Hz",        enabled: pump2StrokesEnabled,   setEnabled: setPump2StrokesEnabled,  setValue: setPump2StrokesValue },
-                ].map((s, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <input type="checkbox" checked={s.enabled} onChange={(e) => s.setEnabled(e.target.checked)} className="size-4 accent-primary" />
-                    <label className="text-sm text-foreground/70 w-44" style={{ fontFamily: "var(--font-family-base)" }}>{s.label}</label>
-                    <input
-                      type="text"
-                      value={s.value}
-                      onChange={(e) => s.setValue(e.target.value)}
-                      className="w-28 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
-                    />
-                    <span className="text-sm text-foreground/50" style={{ fontFamily: "var(--font-family-base)" }}>{s.unit}</span>
-                  </div>
-                ))}
+              {/* Firmware Version */}
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-foreground/60 w-32" style={{ fontFamily: "var(--font-family-base)" }}>Firmware Version</label>
+                <span className="text-sm font-mono font-semibold text-foreground/80">{firmwareVersion}</span>
               </div>
             </div>
           )}
 
-          {/* ── FIRMWARE VERSION ── */}
-          {activeTab === "firmware" && (
+          {/* ── FIRMWARE VERSION (removed, kept for reference) ── */}
+          {false && (
             <div className="p-6 flex flex-col gap-5 max-w-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
@@ -467,30 +426,32 @@ export function SurfaceUnitSettings({ onClose }: SurfaceUnitSettingsProps) {
         {/* Spacer matching left sidebar width */}
         <div className="w-64 shrink-0 border-r border-border h-full" />
         {/* Aligned to max-w-xl content block above */}
-        <div className="flex-1 max-w-xl flex items-center justify-end gap-3 px-6">
-        <button
-          onClick={handleClose}
-          className="px-4 h-8 rounded bg-secondary border border-border text-foreground hover:bg-secondary/80 transition-colors"
-          style={{
-            fontFamily: "var(--font-family-base)",
-            fontSize: "var(--text-sm)",
-            fontWeight: "var(--font-weight-medium)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          {t("las_cancel")}
-        </button>
-        <button
-          className="px-4 h-8 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          style={{
-            fontFamily: "var(--font-family-base)",
-            fontSize: "var(--text-sm)",
-            fontWeight: "var(--font-weight-medium)",
-            borderRadius: "var(--radius)",
-          }}
-        >
-          {t("btn_create_work")}
-        </button>
+        <div className="flex-1 flex items-center justify-end gap-3 px-6">
+          <button
+            onClick={handleClose}
+            className="px-4 h-8 rounded bg-secondary border border-border text-foreground hover:bg-secondary/80 transition-colors"
+            style={{
+              fontFamily: "var(--font-family-base)",
+              fontSize: "var(--text-sm)",
+              fontWeight: "var(--font-weight-medium)",
+              borderRadius: "var(--radius)",
+            }}
+          >
+            Close
+          </button>
+          {activeTab !== "port-selection" && (
+            <button
+              className="px-4 h-8 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              style={{
+                fontFamily: "var(--font-family-base)",
+                fontSize: "var(--text-sm)",
+                fontWeight: "var(--font-weight-medium)",
+                borderRadius: "var(--radius)",
+              }}
+            >
+              {t("btn_create_work")}
+            </button>
+          )}
         </div>
       </div>
 

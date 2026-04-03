@@ -11,21 +11,19 @@ type TabId = "info" | "location" | "elevation" | "parameters" | "tie-in";
 const tabs: { id: TabId; label: string }[] = [
   { id: "info", label: "Well Information" },
   { id: "location", label: "Location" },
-  { id: "elevation", label: "Elevation Reference" },
-  { id: "parameters", label: "Calculation Parameters" },
+  { id: "elevation", label: "Reference elevation" },
+  { id: "parameters", label: "Gamma Calibration Factor" },
   { id: "tie-in", label: "Tie-In Point" },
 ];
 
 export function WorkSettings({ onClose }: WorkSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabId>("info");
   const [formData, setFormData] = useState({
-    country: "",
-    engineer: "",
+    company: "",
     well: "",
     field: "",
-    serviceCompany: "",
-    region: "",
-    area: "",
+    county: "",
+    state: "",
   });
 
   const [locationFormat, setLocationFormat] = useState<"dms" | "decimal">("dms");
@@ -148,181 +146,30 @@ export function WorkSettings({ onClose }: WorkSettingsProps) {
         <div className="flex-1 min-h-0 overflow-auto">
           {activeTab === "info" && (
             <div className="p-6">
-              {/* Form fields */}
-              <div className="max-w-3xl flex flex-col gap-4">
-                {/* Country */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.country}
-                    onChange={(e) => handleInputChange("country", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Engineer */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Engineer
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.engineer}
-                    onChange={(e) => handleInputChange("engineer", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Well */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Well
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.well}
-                    onChange={(e) => handleInputChange("well", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Field */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >\n                    Field
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.field}
-                    onChange={(e) => handleInputChange("field", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Service Company */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Service Company
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.serviceCompany}
-                    onChange={(e) => handleInputChange("serviceCompany", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Region */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Region
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.region}
-                    onChange={(e) => handleInputChange("region", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
-
-                {/* Area */}
-                <div className="flex items-center gap-4">
-                  <label
-                    className="w-40 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    Area
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.area}
-                    onChange={(e) => handleInputChange("area", e.target.value)}
-                    className="flex-1 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                </div>
+              <div className="max-w-sm flex flex-col gap-4">
+                {[
+                  { key: "company", label: "Company" },
+                  { key: "well",    label: "Well" },
+                  { key: "field",   label: "Field" },
+                  { key: "county",  label: "County" },
+                  { key: "state",   label: "State" },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label
+                      className="text-foreground/60"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
+                    >
+                      {label}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData[key as keyof typeof formData]}
+                      onChange={(e) => handleInputChange(key, e.target.value)}
+                      className="h-8 w-full px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -374,73 +221,30 @@ export function WorkSettings({ onClose }: WorkSettingsProps) {
                 </div>
 
                 {/* Latitude and Longitude inputs */}
-                <div className="flex flex-col gap-3">
-                  {/* Latitude */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-24 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      Latitude
+                <div className="flex gap-6">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-foreground/60" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>
+                      Latitude <span className="text-foreground/40">[D°MM'SS[N,S]]</span>
                     </label>
                     <input
                       type="text"
                       value={latitude}
                       onChange={(e) => setLatitude(e.target.value)}
-                      className="w-64 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
+                      className="w-56 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
                     />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-xs)",
-                      }}
-                    >
-                      [D°MM'SS[N,S]]
-                    </span>
                   </div>
-
-                  {/* Longitude */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-24 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      Longitude
+                  <div className="flex flex-col gap-1">
+                    <label className="text-foreground/60" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>
+                      Longitude <span className="text-foreground/40">[D°MM'SS[E,W]]</span>
                     </label>
                     <input
                       type="text"
                       value={longitude}
                       onChange={(e) => setLongitude(e.target.value)}
-                      className="w-64 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
+                      className="w-56 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
                     />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-xs)",
-                      }}
-                    >
-                      [D°MM'SS[E,W]]
-                    </span>
                   </div>
                 </div>
 
@@ -458,103 +262,67 @@ export function WorkSettings({ onClose }: WorkSettingsProps) {
 
           {activeTab === "elevation" && (
             <div className="p-6">
-              <div className="max-w-5xl flex flex-col gap-6">
+              <div className="max-w-xl flex flex-col gap-6">
                 {/* Elevation Reference dropdown */}
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-1">
                   <label
-                    className="w-64 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
+                    className="text-foreground/60"
+                    style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
                   >
-                    Elevation Reference Point
+                    Reference elevation
                   </label>
                   <select
                     value={elevationReference}
                     onChange={(e) => setElevationReference(e.target.value)}
                     className="w-64 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
+                    style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
                   >
                     <option value="Rotary Table">Rotary Table</option>
-                    <option value="Drill Floor">Drill Floor</option>
+                    <option value="Ground Level">Ground Level</option>
                     <option value="Kelly Bushing">Kelly Bushing</option>
                   </select>
                 </div>
 
                 {/* Elevation inputs */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {/* Rotary Table Elevation */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
                     <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
+                      className="text-foreground/60"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
                     >
                       Reference Point Rotary Table from Sea Level
                     </label>
-                    <input
-                      type="text"
-                      value={rotaryTableElevation}
-                      onChange={(e) => setRotaryTableElevation(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={rotaryTableElevation}
+                        onChange={(e) => setRotaryTableElevation(e.target.value)}
+                        className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                        style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
+                      />
+                      <span className="text-muted-foreground" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)" }}>m</span>
+                    </div>
                   </div>
 
                   {/* Ground Level Elevation */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
                     <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
+                      className="text-foreground/60"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
                     >
                       Ground Level from Sea Level
                     </label>
-                    <input
-                      type="text"
-                      value={groundLevelElevation}
-                      onChange={(e) => setGroundLevelElevation(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={groundLevelElevation}
+                        onChange={(e) => setGroundLevelElevation(e.target.value)}
+                        className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                        style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
+                      />
+                      <span className="text-muted-foreground" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)" }}>m</span>
+                    </div>
                   </div>
                 </div>
 
@@ -691,88 +459,51 @@ export function WorkSettings({ onClose }: WorkSettingsProps) {
 
           {activeTab === "parameters" && (
             <div className="p-6 h-full">
-              <div className="max-w-5xl flex flex-col gap-6">
-                {/* API Correction */}
-                <div className="flex items-center gap-4 relative">
-                  <label
-                    className="w-64 text-right shrink-0 text-foreground/80"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      fontWeight: "var(--font-weight-normal)",
-                    }}
-                  >
-                    API Correction
-                  </label>
+              <div className="max-w-xl flex flex-col gap-6">
+                {/* Gamma Calibration Factor */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <label
+                      className="text-foreground/60"
+                      style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
+                    >
+                      Gamma Calibration Factor
+                    </label>
+                    {/* Info icon with tooltip */}
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setShowApiTooltip(true)}
+                      onMouseLeave={() => setShowApiTooltip(false)}
+                    >
+                      <Info className="size-3.5 text-primary cursor-help" />
+                      {showApiTooltip && (
+                        <div
+                          className="absolute left-5 top-0 bg-background border border-border rounded px-3 py-2 shadow-lg z-10 whitespace-nowrap"
+                          style={{ borderRadius: "var(--radius)", minWidth: "300px" }}
+                        >
+                          <p className="text-foreground mb-1" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", lineHeight: "1.4" }}>
+                            Coefficient by which gamma values are multiplied
+                          </p>
+                          <p className="text-foreground mb-1" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", lineHeight: "1.4" }}>
+                            (specified in the device passport)
+                          </p>
+                          <p className="text-foreground" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", lineHeight: "1.4" }}>
+                            min = 10
+                          </p>
+                          <p className="text-foreground" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", lineHeight: "1.4" }}>
+                            max = 15
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <input
                     type="text"
                     value={apiCorrection}
                     onChange={(e) => setApiCorrection(e.target.value)}
                     className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                    style={{
-                      fontFamily: "var(--font-family-base)",
-                      fontSize: "var(--text-sm)",
-                      borderRadius: "var(--radius)",
-                    }}
+                    style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
                   />
-                  {/* Info icon with tooltip */}
-                  <div
-                    className="relative"
-                    onMouseEnter={() => setShowApiTooltip(true)}
-                    onMouseLeave={() => setShowApiTooltip(false)}
-                  >
-                    <Info className="size-4 text-primary cursor-help" />
-                    {showApiTooltip && (
-                      <div
-                        className="absolute left-6 top-0 bg-background border border-border rounded px-3 py-2 shadow-lg z-10 whitespace-nowrap"
-                        style={{
-                          borderRadius: "var(--radius)",
-                          minWidth: "300px",
-                        }}
-                      >
-                        <p
-                          className="text-foreground mb-1"
-                          style={{
-                            fontFamily: "var(--font-family-base)",
-                            fontSize: "var(--text-xs)",
-                            lineHeight: "1.4",
-                          }}
-                        >
-                          Coefficient by which gamma values are multiplied
-                        </p>
-                        <p
-                          className="text-foreground mb-1"
-                          style={{
-                            fontFamily: "var(--font-family-base)",
-                            fontSize: "var(--text-xs)",
-                            lineHeight: "1.4",
-                          }}
-                        >
-                          (specified in the device passport)
-                        </p>
-                        <p
-                          className="text-foreground"
-                          style={{
-                            fontFamily: "var(--font-family-base)",
-                            fontSize: "var(--text-xs)",
-                            lineHeight: "1.4",
-                          }}
-                        >
-                          min = 10
-                        </p>
-                        <p
-                          className="text-foreground"
-                          style={{
-                            fontFamily: "var(--font-family-base)",
-                            fontSize: "var(--text-xs)",
-                            lineHeight: "1.4",
-                          }}
-                        >
-                          max = 15
-                        </p>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -780,212 +511,36 @@ export function WorkSettings({ onClose }: WorkSettingsProps) {
 
           {activeTab === "tie-in" && (
             <div className="p-6 h-full">
-              <div className="max-w-5xl flex flex-col gap-6">
-                {/* Tie-in Point inputs */}
-                <div className="flex flex-col gap-3">
-                  {/* MD */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      MD
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInMD}
-                      onChange={(e) => setTieInMD(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
-                  </div>
-
-                  {/* INCL */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      INCL
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInINCL}
-                      onChange={(e) => setTieInINCL(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      °
-                    </span>
-                  </div>
-
-                  {/* AZIM */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      AZIM
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInAZIM}
-                      onChange={(e) => setTieInAZIM(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      °
-                    </span>
-                  </div>
-
-                  {/* TVD */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      TVD
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInTVD}
-                      onChange={(e) => setTieInTVD(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
-                  </div>
-
-                  {/* NS */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      NS
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInNS}
-                      onChange={(e) => setTieInNS(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
-                  </div>
-
-                  {/* EW */}
-                  <div className="flex items-center gap-4">
-                    <label
-                      className="w-64 text-right shrink-0 text-foreground/80"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        fontWeight: "var(--font-weight-normal)",
-                      }}
-                    >
-                      EW
-                    </label>
-                    <input
-                      type="text"
-                      value={tieInEW}
-                      onChange={(e) => setTieInEW(e.target.value)}
-                      className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                        borderRadius: "var(--radius)",
-                      }}
-                    />
-                    <span
-                      className="text-muted-foreground"
-                      style={{
-                        fontFamily: "var(--font-family-base)",
-                        fontSize: "var(--text-sm)",
-                      }}
-                    >
-                      m
-                    </span>
-                  </div>
+              <div className="max-w-xl flex flex-col gap-6">
+                {/* Tie-in Point inputs — 2-column grid */}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  {[
+                    { label: "MD",   unit: "m",  value: tieInMD,   setter: setTieInMD },
+                    { label: "TVD",  unit: "m",  value: tieInTVD,  setter: setTieInTVD },
+                    { label: "INCL", unit: "°",  value: tieInINCL, setter: setTieInINCL },
+                    { label: "NS",   unit: "m",  value: tieInNS,   setter: setTieInNS },
+                    { label: "AZIM", unit: "°",  value: tieInAZIM, setter: setTieInAZIM },
+                    { label: "EW",   unit: "m",  value: tieInEW,   setter: setTieInEW },
+                  ].map(({ label, unit, value, setter }) => (
+                    <div key={label} className="flex flex-col gap-1">
+                      <label
+                        className="text-foreground/60"
+                        style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}
+                      >
+                        {label} <span className="text-foreground/40">[{unit}]</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => setter(e.target.value)}
+                          className="w-32 h-8 px-3 bg-input-background border border-border rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-shadow"
+                          style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)", borderRadius: "var(--radius)" }}
+                        />
+                        <span className="text-muted-foreground" style={{ fontFamily: "var(--font-family-base)", fontSize: "var(--text-sm)" }}>{unit}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router";
+import { ScaledContainer } from "./ViewportScale";
 import { PressureChart } from "./PressureChart";
 import { DecoderChart } from "./DecoderChart";
 import { SpectrogramView } from "./SpectrogramView";
@@ -104,10 +105,16 @@ function WidgetLoader() {
     }
   };
 
+  // ScaledContainer:
+  //  • measures viewport width, calculates scale = max(1, vw / 1920)
+  //  • provides ViewportScaleContext so fluid() inside uses fixed px (no double-scaling)
+  //  • applies CSS transform:scale() so everything — charts, text, layout — grows uniformly
   return (
-    <div className="w-screen h-screen bg-background overflow-hidden p-2">
-      {renderWidget()}
-    </div>
+    <ScaledContainer>
+      <div className="w-full h-full p-2">
+        {renderWidget()}
+      </div>
+    </ScaledContainer>
   );
 }
 

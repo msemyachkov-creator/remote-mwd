@@ -1,6 +1,43 @@
 import React, { useRef, useEffect } from "react";
 import { useI18n } from "../i18n";
 
+type SignalLevel = "good" | "medium" | "poor";
+
+const SIGNAL_CONFIG: Record<SignalLevel, { label: string; color: string; bars: number }> = {
+  good:   { label: "Good",   color: "var(--chart-2)",    bars: 4 },
+  medium: { label: "Medium", color: "#eab308",            bars: 2 },
+  poor:   { label: "Poor",   color: "var(--destructive)", bars: 1 },
+};
+
+function SignalQualityBadge({ level = "good" }: { level?: SignalLevel }) {
+  const { label, color, bars } = SIGNAL_CONFIG[level];
+  return (
+    <div className="flex items-center gap-1.5">
+      <span style={{ fontSize: "10px", fontFamily: "var(--font-family-base)", color: "var(--foreground)", opacity: 0.45, fontWeight: 500 }}>
+        Signal quality
+      </span>
+      {/* 4 ascending bars */}
+      <div className="flex items-end gap-[2px]" style={{ height: "12px" }}>
+        {[3, 6, 9, 12].map((h, i) => (
+          <div
+            key={i}
+            style={{
+              width: "3px",
+              height: `${h}px`,
+              borderRadius: "1px",
+              backgroundColor: i < bars ? color : "var(--border)",
+              opacity: i < bars ? 1 : 0.4,
+            }}
+          />
+        ))}
+      </div>
+      <span style={{ fontSize: "10px", fontFamily: "var(--font-family-base)", color, fontWeight: 700 }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
 // SYNC is 48 samples (2× wider), 4 FIDs split evenly across remaining 152
 const PACKETS = [
   { label: "SYNC",  start: 0,   end: 48,  type: "sync" as const },
@@ -213,13 +250,15 @@ export function PulseView({ actions }: PulseViewProps = {}) {
   }, []);
 
   return (
-    <div className="h-64 border-t border-border bg-background flex flex-col">
+    <div className="h-80 border-t border-border bg-background flex flex-col">
       {/* Header */}
       <div className="px-4 py-2 border-b border-border bg-secondary/10 flex items-center justify-between shrink-0">
         <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">
           {t("sum_pulse_view")}
         </span>
         <div className="flex items-center gap-4">
+          <SignalQualityBadge level="good" />
+          <div className="w-px h-3 bg-border/60" />
           <span className="text-[10px] font-mono text-foreground/40">MIN: 141.2 bar</span>
           <span className="text-[10px] font-mono text-foreground/40">MAX: 148.4 bar</span>
           <span className="text-[10px] font-mono text-primary font-bold">AVG: 142.5 bar</span>

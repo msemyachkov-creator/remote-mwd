@@ -1,6 +1,7 @@
 import React from "react";
 import { useI18n } from "../i18n";
 import { useWell } from "../WellContext";
+import { useFluid } from "../ViewportScale";
 import { PolarChartWidget } from "../PolarChartWidget";
 
 interface GaugeCircleProps {
@@ -239,6 +240,10 @@ function GaugeCircle({ label, value, unit = "°", max = 360, colorClass = "bg-pr
   );
 }
 
+// fluid() is now context-aware via useFluid():
+//   • main view  → clamp(px, vw%, max)   — grows with viewport
+//   • standalone → returns fixed px       — CSS transform handles scaling
+
 interface NumeralWidgetProps {
   label: string;
   value: number;
@@ -246,22 +251,76 @@ interface NumeralWidgetProps {
   decimals?: number;
 }
 
-function NumeralWidget({ label, value, unit, decimals = 2 }: NumeralWidgetProps) {
+// ─── Featured widget for AZM / INC ───────────────────────────────────────────
+function FeaturedNumeralWidget({ label, value, unit }: { label: string; value: string; unit: string }) {
+  const fluid = useFluid();
   return (
     <div
-      className="flex-1 flex items-center gap-2 px-4 py-3 bg-secondary/30 border border-border/30 rounded"
-      style={{ borderRadius: "var(--radius)" }}
+      className="flex-1 flex flex-col justify-center relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), color-mix(in srgb, var(--primary) 4%, transparent))",
+        border: "1px solid color-mix(in srgb, var(--primary) 35%, transparent)",
+        borderLeft: `${fluid(3)} solid var(--primary)`,
+        borderRadius: "var(--radius)",
+        padding: `${fluid(8)} ${fluid(12)}`,
+        gap: fluid(2),
+      }}
     >
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 70%)" }}
+      />
       <span
-        className="text-foreground/70 shrink-0"
-        style={{ fontSize: "10px", fontFamily: "var(--font-family-base)", fontWeight: "var(--font-weight-medium)" }}
+        className="uppercase tracking-widest text-foreground/50 z-10"
+        style={{ fontSize: fluid(9), fontFamily: "var(--font-family-base)", fontWeight: 700 }}
       >
         {label}
       </span>
-      <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "19px" }}>
+      <div className="flex items-baseline z-10" style={{ gap: fluid(3) }}>
+        <span
+          className="font-mono font-bold leading-none tabular-nums"
+          style={{ fontSize: fluid(30), color: "var(--primary)", letterSpacing: "-0.02em" }}
+        >
+          {value}
+        </span>
+        <span
+          className="font-mono"
+          style={{ fontSize: fluid(13), color: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
+        >
+          {unit}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function NumeralWidget({ label, value, unit, decimals = 2 }: NumeralWidgetProps) {
+  const fluid = useFluid();
+  return (
+    <div
+      className="flex-1 flex items-center bg-secondary/30 border border-border/30 rounded"
+      style={{
+        borderRadius: "var(--radius)",
+        gap: fluid(8),
+        padding: `${fluid(7)} ${fluid(14)}`,
+      }}
+    >
+      <span
+        className="text-foreground/70 shrink-0"
+        style={{ fontSize: fluid(12), fontFamily: "var(--font-family-base)", fontWeight: "var(--font-weight-medium)" }}
+      >
+        {label}
+      </span>
+      <span
+        className="font-mono font-bold text-foreground/90 leading-none tabular-nums"
+        style={{ fontSize: fluid(22) }}
+      >
         {value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
       </span>
-      <span className="text-muted-foreground shrink-0" style={{ fontSize: "9px", fontFamily: "var(--font-family-base)" }}>
+      <span
+        className="text-muted-foreground shrink-0"
+        style={{ fontSize: fluid(11), fontFamily: "var(--font-family-base)" }}
+      >
         {unit}
       </span>
     </div>
@@ -280,18 +339,35 @@ function StatusBadge({ children, color }: { children: React.ReactNode; color?: s
 }
 
 export function ToolfaceWidget() {
+  const fluid = useFluid();
   const { t } = useI18n();
   const { activeWell } = useWell();
   const [activeGauge, setActiveGauge] = React.useState<"gtf" | "mtf">("gtf");
+  const [gaugeSize, setGaugeSize] = React.useState(300);
+  const middleRowRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const el = middleRowRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setGaugeSize(entry.contentRect.height));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const { gtf: gtfValue, inc: incValue, azm: azmValue, gamma: grValue, pressure: sppValue, temp: tempValue } = activeWell;
   const mtfValue = parseFloat(((gtfValue + 137) % 360).toFixed(1));
   const ropValue = 13.7;
   const syncAcquired = true;
   const pumpsOn = activeWell.status === "active";
+  const onBottom = true;
+  const witsStatus: "connected" | "warning" | "disconnected" = "connected";
   const circTime = "0:01:42";
   const lastPkt = "4s ago";
   const pw = 0.375;
+
+  const witsDotCls  = witsStatus === "connected" ? "bg-chart-2 animate-pulse" : witsStatus === "warning" ? "" : "bg-destructive";
+  const witsDotStyle = witsStatus === "warning" ? { backgroundColor: "#eab308" } : {};
+  const witsTextCls  = witsStatus === "connected" ? "border-chart-2/40 text-chart-2" : witsStatus === "warning" ? "" : "border-destructive/40 text-destructive";
+  const witsTextStyle = witsStatus === "warning" ? { borderColor: "#eab30840", color: "#eab308" } : {};
 
   const gaugeAngle = activeGauge === "gtf" ? gtfValue : mtfValue;
   const gaugeLabel = activeGauge === "gtf" ? t("sum_gtf") : t("sum_mtf");
@@ -306,52 +382,198 @@ export function ToolfaceWidget() {
   const tabInactive = "text-primary/40 hover:bg-primary/10 hover:text-primary/60";
 
   return (
-    <div className="flex-1 flex flex-col p-3 gap-0.5 bg-background relative overflow-hidden select-none">
+    <div className="flex-1 flex flex-col px-3 pt-1.5 pb-1 gap-0.5 bg-background relative overflow-hidden select-none">
       <div className="absolute inset-0 bg-radial-[circle_at_center,_var(--color-primary)_0%,_transparent_70%] opacity-[0.02] pointer-events-none" />
 
-      {/* TOP ROW — compact numerals */}
-      <div className="shrink-0 flex items-stretch gap-[20px] z-10">
-        <div className="flex items-center gap-2 px-4 py-3 border border-border/20 bg-background/60 rounded shrink-0" style={{ borderRadius: "var(--radius)" }}>
+      {/* TOP ROW — status badges + numerals */}
+      <div className="shrink-0 flex items-stretch z-10" style={{ gap: fluid(8) }}>
+        {/* DRILLING */}
+        <div
+          className="flex items-center border border-border/20 bg-background/60 rounded shrink-0"
+          style={{ gap: fluid(6), padding: `${fluid(7)} ${fluid(12)}`, borderRadius: "var(--radius)" }}
+        >
           <div className={`size-1.5 rounded-full animate-pulse ${activeWell.status === "active" ? "bg-accent" : activeWell.status === "standby" ? "bg-chart-3" : "bg-foreground/20"}`} />
-          <span className="text-[10px] font-bold text-foreground/50 tracking-widest uppercase">
+          <span className="font-bold text-foreground/50 tracking-widest uppercase" style={{ fontSize: fluid(9) }}>
             {activeWell.status === "active" ? "DRILLING" : activeWell.status === "standby" ? "STANDBY" : "OFFLINE"}
           </span>
+        </div>
+        {/* REAL-TIME */}
+        <div
+          className="flex items-center border border-border/20 bg-background/60 rounded shrink-0"
+          style={{ gap: fluid(6), padding: `${fluid(7)} ${fluid(12)}`, borderRadius: "var(--radius)" }}
+        >
+          <div className="size-1.5 rounded-full bg-accent animate-pulse" />
+          <span className="font-bold text-foreground/50 tracking-widest uppercase" style={{ fontSize: fluid(9) }}>REAL-TIME</span>
         </div>
         <NumeralWidget label="ROP" value={ropValue} unit="m/h" decimals={1} />
         <NumeralWidget label="GR"  value={grValue}  unit="API" decimals={1} />
         <NumeralWidget label="SPP" value={sppValue} unit="PSI" decimals={0} />
       </div>
 
-      {/* MIDDLE — flex row: left col | 40px gap | gauge | 40px gap | right col */}
-      <div className="flex-1 flex items-center min-h-0 relative">
+      {/* MIDDLE — flex row: data card | left col | gap | gauge | gap | right col */}
+      <div ref={middleRowRef} className="flex-1 flex items-center min-h-0 relative">
 
-        {/* Status badges — left column */}
-        <div className="flex flex-col gap-[20px] w-[213px] shrink-0 ml-2 z-10">
-          <div className={`flex items-center gap-2 px-3 py-2 border rounded text-[13px] font-bold tracking-widest uppercase w-full ${syncAcquired ? "border-accent/40 text-accent" : "border-destructive/40 text-destructive"}`} style={{ borderRadius: "var(--radius)" }}>
-            <span className={`size-2 rounded-full shrink-0 ${syncAcquired ? "bg-accent animate-pulse" : "bg-destructive"}`} />
-            {syncAcquired ? "SYNC ACQUIRED" : "NO SYNC"}
-          </div>
-          <div className={`flex items-center gap-2 px-3 py-2 border rounded text-[13px] font-bold tracking-widest uppercase w-full ${pumpsOn ? "border-chart-3/40 text-chart-3" : "border-border/40 text-foreground/40"}`} style={{ borderRadius: "var(--radius)" }}>
-            <span className={`size-2 rounded-full shrink-0 ${pumpsOn ? "bg-chart-3 animate-pulse" : "bg-foreground/20"}`} />
-            {pumpsOn ? "PUMPS ON" : "PUMPS OFF"}
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>Circ: {circTime}</div>
-          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>Last: {lastPkt}</div>
-          <div className="flex items-center gap-2 px-3 py-2 border border-border/20 rounded text-[13px] font-mono text-foreground/40 w-full" style={{ borderRadius: "var(--radius)" }}>PW: {pw}</div>
+        {/* Summary data card — left vertical panel */}
+        <div
+          className="flex flex-col shrink-0 border-r border-border/20 overflow-y-auto"
+          style={{ width: fluid(185), alignSelf: "stretch", paddingTop: fluid(20) }}
+        >
+          {[
+            {
+              title: "DEPTH",
+              rows: [
+                { label: "Hole Depth", value: activeWell.holeDepth.toFixed(1), unit: "m" },
+                { label: "Bit Depth",  value: activeWell.bitDepth.toFixed(1),  unit: "m" },
+                { label: "Kelly Down", value: Math.max(0, activeWell.holeDepth - activeWell.bitDepth).toFixed(2), unit: "m" },
+              ],
+            },
+            {
+              title: "DIRECTIONAL",
+              rows: [
+                { label: "INC", value: incValue.toFixed(2), unit: "°" },
+                { label: "AZM", value: azmValue.toFixed(2), unit: "°" },
+                { label: "GTF", value: gtfValue.toFixed(1), unit: "°" },
+                { label: "MTF", value: mtfValue.toFixed(1), unit: "°" },
+              ],
+            },
+            {
+              title: "MAGNETIC",
+              rows: [
+                { label: "B Field", value: bField,   unit: "nT" },
+                { label: "Dip",     value: dip,      unit: "°"  },
+                { label: "G Field", value: gField,   unit: "G"  },
+              ],
+            },
+            {
+              title: "DRILLING",
+              rows: [
+                { label: "GR",   value: grValue.toFixed(1),  unit: "API" },
+                { label: "Temp", value: envTemp,              unit: "°C"  },
+                { label: "SPP",  value: sppValue.toFixed(0),  unit: "PSI" },
+              ],
+            },
+          ].map((group) => (
+            <div key={group.title}>
+              <div
+                style={{
+                  padding: `${fluid(3)} ${fluid(10)} ${fluid(1)}`,
+                  fontSize: fluid(8),
+                  fontFamily: "var(--font-family-base)",
+                  fontWeight: 700,
+                  color: "var(--foreground)",
+                  opacity: 0.3,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                {group.title}
+              </div>
+              {group.rows.map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between border-t border-border/10"
+                  style={{ padding: `${fluid(3)} ${fluid(10)}` }}
+                >
+                  <span
+                    style={{
+                      fontSize: fluid(10),
+                      fontFamily: "var(--font-family-base)",
+                      color: "var(--foreground)",
+                      opacity: 0.45,
+                    }}
+                  >
+                    {row.label}
+                  </span>
+                  <div className="flex items-baseline" style={{ gap: fluid(2) }}>
+                    <span
+                      style={{
+                        fontSize: fluid(12),
+                        fontFamily: "var(--font-family-mono)",
+                        fontWeight: 600,
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      {row.value}
+                    </span>
+                    <span
+                      style={{ fontSize: fluid(9), color: "var(--muted-foreground)" }}
+                    >
+                      {row.unit}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
 
-        {/* 40px gap left */}
-        <div className="w-10 shrink-0" />
+        {/* Status badges — left column */}
+        <div
+          className="flex flex-col shrink-0 ml-2 z-10"
+          style={{ gap: fluid(5), width: fluid(140) }}
+        >
+          {/* SYNC */}
+          <div
+            className={`flex items-center border rounded font-bold tracking-widest uppercase w-full ${syncAcquired ? "border-accent/40 text-accent" : "border-destructive/40 text-destructive"}`}
+            style={{ gap: fluid(6), padding: `${fluid(4)} ${fluid(10)}`, fontSize: fluid(11), borderRadius: "var(--radius)" }}
+          >
+            <span className={`rounded-full shrink-0 ${syncAcquired ? "bg-accent animate-pulse" : "bg-destructive"}`} style={{ width: fluid(7), height: fluid(7) }} />
+            {syncAcquired ? "SYNC ACQUIRED" : "NO SYNC"}
+          </div>
 
-        {/* Gauge — fills remaining space */}
-        <div className="flex-1 relative min-h-0 self-stretch">
+          {/* PUMPS */}
+          <div
+            className={`flex items-center border rounded font-bold tracking-widest uppercase w-full ${pumpsOn ? "border-chart-3/40 text-chart-3" : "border-border/40 text-foreground/40"}`}
+            style={{ gap: fluid(6), padding: `${fluid(4)} ${fluid(10)}`, fontSize: fluid(11), borderRadius: "var(--radius)" }}
+          >
+            <span className={`rounded-full shrink-0 ${pumpsOn ? "bg-chart-3 animate-pulse" : "bg-foreground/20"}`} style={{ width: fluid(7), height: fluid(7) }} />
+            {pumpsOn ? "PUMPS ON" : "PUMPS OFF"}
+          </div>
+
+          {/* WITS */}
+          <div
+            className={`flex items-center border rounded font-bold tracking-widest uppercase w-full ${witsTextCls}`}
+            style={{ gap: fluid(6), padding: `${fluid(4)} ${fluid(10)}`, fontSize: fluid(11), borderRadius: "var(--radius)", ...witsTextStyle }}
+          >
+            <span className={`rounded-full shrink-0 ${witsDotCls}`} style={{ width: fluid(7), height: fluid(7), ...witsDotStyle }} />
+            WITS
+          </div>
+
+          {/* ON / OFF BOTTOM */}
+          <div
+            className={`flex items-center border rounded font-bold tracking-widest uppercase w-full ${onBottom ? "border-chart-2/40 text-chart-2" : "border-border/40 text-foreground/40"}`}
+            style={{ gap: fluid(6), padding: `${fluid(4)} ${fluid(10)}`, fontSize: fluid(11), borderRadius: "var(--radius)" }}
+          >
+            <span className={`rounded-full shrink-0 ${onBottom ? "bg-chart-2 animate-pulse" : "bg-foreground/20"}`} style={{ width: fluid(7), height: fluid(7) }} />
+            {onBottom ? "ON BOTTOM" : "OFF BOTTOM"}
+          </div>
+          {[
+            `Circ: ${circTime}`,
+            `Last synch: ${lastPkt}`,
+            `PW: ${pw}`,
+          ].map((text) => (
+            <div
+              key={text}
+              className="flex items-center border border-border/20 rounded font-mono text-foreground/40 w-full"
+              style={{ gap: fluid(6), padding: `${fluid(4)} ${fluid(10)}`, fontSize: fluid(11), borderRadius: "var(--radius)" }}
+            >
+              {text}
+            </div>
+          ))}
+        </div>
+
+        {/* fluid gap left */}
+        <div style={{ width: fluid(2), flexShrink: 0 }} />
+
+        {/* Gauge — exact square (width = measured row height) → no horizontal dead zones */}
+        <div className="relative shrink-0" style={{ width: gaugeSize, height: gaugeSize }}>
           <div className="absolute inset-0">
             <PolarChartWidget label={gaugeLabel} gtfAngle={gaugeAngle} gtfValue={gaugeAngle} timestamp="00:56" />
           </div>
         </div>
 
-        {/* 40px gap right */}
-        <div className="w-10 shrink-0" />
+        {/* fluid gap right */}
+        <div style={{ width: fluid(2), flexShrink: 0 }} />
 
         {/* Tab switcher — absolute top-right of middle block */}
         <div className="absolute top-[20px] right-2 z-20 flex border border-primary/30 rounded overflow-hidden bg-primary/5">
@@ -360,42 +582,58 @@ export function ToolfaceWidget() {
           <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
         </div>
 
-        {/* Environment widgets — right column */}
-        <div className="flex flex-col gap-[20px] w-[235px] shrink-0 mr-2 z-10">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
-            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>B Field</span>
-            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{bField}</span>
-            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>nT</span>
+        {/* Right column: AZM + INC featured + env widgets */}
+        <div
+          className="flex flex-col shrink-0 mr-2 z-10"
+          style={{ gap: fluid(6), width: fluid(245) }}
+        >
+          <div className="flex flex-col shrink-0" style={{ gap: fluid(6) }}>
+            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
+            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
           </div>
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
-            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>Dip</span>
-            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{dip}</span>
-            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>°</span>
-          </div>
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
-            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>G Field</span>
-            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{gField}</span>
-            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>g</span>
-          </div>
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-secondary/30 border border-border/30 rounded" style={{ borderRadius: "var(--radius)" }}>
-            <span className="text-foreground/70 shrink-0" style={{ fontSize: "13px", fontFamily: "var(--font-family-base)" }}>Temp</span>
-            <span className="font-mono font-bold text-foreground/90 leading-none tabular-nums" style={{ fontSize: "20px" }}>{envTemp}</span>
-            <span className="text-muted-foreground shrink-0" style={{ fontSize: "12px" }}>°C</span>
+          <div className="flex flex-col" style={{ gap: fluid(3) }}>
+            {[
+              { label: "B Field",    value: bField,                                                      unit: "nT"   },
+              { label: "Dip",        value: dip,                                                         unit: "°"    },
+              { label: "G Field",    value: gField,                                                      unit: "G"    },
+              { label: "Temp",       value: envTemp,                                                     unit: "°C"   },
+              { label: "WOB",        value: (12 + activeWell.seed % 8).toFixed(1),                      unit: "klbf" },
+              { label: "Hook Load",  value: (180 + activeWell.seed % 40).toFixed(0),                    unit: "klbf" },
+            ].map(({ label, value, unit }) => (
+              <div
+                key={label}
+                className="flex items-center bg-secondary/20 border border-border/20 rounded"
+                style={{
+                  gap: fluid(8),
+                  padding: `${fluid(4)} ${fluid(10)}`,
+                  borderRadius: "var(--radius)",
+                }}
+              >
+                <span
+                  className="text-foreground/50 shrink-0"
+                  style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)", fontWeight: 500, minWidth: fluid(52) }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="font-mono font-semibold text-foreground/80 tabular-nums ml-auto"
+                  style={{ fontSize: fluid(14) }}
+                >
+                  {value}
+                </span>
+                <span
+                  className="text-muted-foreground shrink-0"
+                  style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)" }}
+                >
+                  {unit}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
       </div>
 
-      {/* BOTTOM ROW — compact numerals */}
-      <div className="shrink-0 flex items-stretch gap-[20px] z-10">
-        <div className="flex items-center gap-2 px-4 py-3 border border-border/20 bg-background/60 rounded shrink-0" style={{ borderRadius: "var(--radius)" }}>
-          <div className="size-1.5 rounded-full bg-accent animate-pulse" />
-          <span className="text-[10px] font-bold text-foreground/50 tracking-widest uppercase">REAL-TIME</span>
-        </div>
-        <NumeralWidget label={t("sum_azm")} value={azmValue}  unit="°"  decimals={2} />
-        <NumeralWidget label={t("sum_inc")} value={incValue}  unit="°"  decimals={2} />
-        <NumeralWidget label="TEMP"         value={tempValue} unit="°C" decimals={1} />
-      </div>
     </div>
   );
 }

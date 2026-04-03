@@ -10,6 +10,7 @@ import { useParams } from "react-router";
 import { ExternalLink, Circle, ChevronDown, ChevronRight, Check } from "lucide-react";
 import { WellProvider, useWell } from "./WellContext";
 import { I18nProvider, type Lang } from "./i18n";
+import { ScaledContainer } from "./ViewportScale";
 import { SummaryView } from "./SummaryView";
 import { DataView } from "./DataView_new";
 import { DepthView } from "./DepthView";
@@ -403,7 +404,8 @@ function DetachedRigContent() {
     activePage !== "report";
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background text-foreground">
+    <ScaledContainer>
+    <div className="flex flex-col w-full h-full overflow-hidden bg-background text-foreground">
 
       {/* ── Detached header bar ─────────────────────────────────────────────── */}
       <div
@@ -510,6 +512,7 @@ function DetachedRigContent() {
         {renderPage()}
       </div>
     </div>
+    </ScaledContainer>
   );
 }
 

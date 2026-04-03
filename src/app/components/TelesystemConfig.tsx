@@ -951,7 +951,7 @@ export function TelesystemConfig() {
       {/* Tab bar */}
       <div className="flex shrink-0 border-b border-border bg-background px-3 gap-1 pt-1">
         {([
-          { id: "telesystem", label: lang === "ru" ? "Настройки телесистемы" : "Telesystem Settings" },
+          { id: "telesystem", label: "Telesystem Settings" },
           { id: "surface",    label: "Surface Unit" },
           { id: "edr",        label: "EDR/HDR Input" },
           { id: "output",     label: "Output" },
@@ -976,9 +976,7 @@ export function TelesystemConfig() {
                 <span className={`size-1.5 rounded-full shrink-0 ${
                   configStatus === "tested" ? "bg-chart-2" : "bg-yellow-500"
                 }`} />
-                {configStatus === "tested"
-                  ? (lang === "ru" ? "Протестировано" : "Tested")
-                  : (lang === "ru" ? "Изменено" : "Modified")}
+                {configStatus === "tested" ? "Tested" : "Modified"}
               </span>
             )}
           </button>

@@ -30,6 +30,17 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
       { mnemonic: "TEMP",  packet: w.temp.toFixed(2),                  datetime: `${d} 15:33:20`, secsAgo: 105, conf: 98, O:  1, L: 22 },
       { mnemonic: "SSN",   packet: String(1 + w.seed % 9),             datetime: `${d} 15:33:15`, secsAgo: 110, conf: 100, O: 0, L: 36 },
       { mnemonic: "SYNC",  packet: "MP SYNC",                          datetime: `${d} 15:33:14`, secsAgo: 111, conf: 100, O: 0, L: 14 },
+      { mnemonic: "RPM",   packet: String(Math.round(80 + w.seed % 40)),         datetime: `${d} 15:33:08`, secsAgo: 117, conf: 98,  O:  0, L: 22 },
+      { mnemonic: "WOB",   packet: (12 + w.seed % 8).toFixed(1),                 datetime: `${d} 15:32:55`, secsAgo: 130, conf: 97,  O:  1, L: 22 },
+      { mnemonic: "TORQ",  packet: (8.4 + w.seed % 5 * 0.3).toFixed(2),         datetime: `${d} 15:32:44`, secsAgo: 141, conf: 97,  O:  0, L: 22 },
+      { mnemonic: "HL",    packet: String(Math.round(180 + w.seed % 40)),         datetime: `${d} 15:32:31`, secsAgo: 154, conf: 98,  O:  0, L: 22 },
+      { mnemonic: "ROP",   packet: (13.7 + w.seed % 3 * 0.1).toFixed(1),        datetime: `${d} 15:32:20`, secsAgo: 165, conf: 96,  O:  2, L: 22 },
+      { mnemonic: "FLOW",  packet: String(Math.round(1200 + w.seed % 80)),        datetime: `${d} 15:32:09`, secsAgo: 176, conf: 98,  O:  0, L: 22 },
+      { mnemonic: "SPP",   packet: w.pressure.toFixed(0),                         datetime: `${d} 15:31:58`, secsAgo: 187, conf: 99,  O:  0, L: 22 },
+      { mnemonic: "BATT",  packet: (28.2 + w.seed % 4 * 0.1).toFixed(1),        datetime: `${d} 15:31:44`, secsAgo: 201, conf: 100, O:  0, L: 22 },
+      { mnemonic: "SYNC",  packet: "MP SYNC",                                     datetime: `${d} 15:31:30`, secsAgo: 215, conf: 100, O:  0, L: 14 },
+      { mnemonic: "GTF",   packet: ((w.gtf + 0.4) % 360).toFixed(2),            datetime: `${d} 15:30:39`, secsAgo: 266, conf: 100, O: -5, L: 38 },
+      { mnemonic: "INC",   packet: (w.inc - 0.01).toFixed(5),                   datetime: `${d} 15:30:38`, secsAgo: 267, conf: 100, O: -5, L: 38 },
     ];
   }, [activeWell]);
 
@@ -40,7 +51,7 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
   ], [activeWell]);
 
   return (
-    <div className="w-[380px] border-l border-border bg-background flex flex-col h-full shrink-0">
+    <div className="w-[440px] border-l border-border bg-background flex flex-col h-full shrink-0">
       {/* Tabs */}
       <div className="flex border-b border-border bg-secondary/5 h-10">
         {[
@@ -76,26 +87,28 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
         {activeTab === "decodes" && (
           <div className="divide-y divide-border">
             {decodes.map((d, i) => (
-              <div key={i} className="px-4 py-1.5 hover:bg-secondary/10 transition-colors grid grid-cols-[56px_1fr_auto] gap-x-2 items-baseline">
-                {/* Col 1: mnemonic */}
-                <span className="text-[11px] font-bold font-mono text-foreground/40 uppercase tracking-wider">
-                  {d.mnemonic}
-                </span>
-                {/* Col 2: value */}
-                <span className="text-[14px] font-bold font-mono text-foreground truncate">
-                  {d.packet}
-                </span>
-                {/* Col 3: seconds ago */}
-                <span className="text-[11px] font-bold text-accent whitespace-nowrap">
+              <div key={i} className="px-4 py-2.5 hover:bg-secondary/10 transition-colors flex items-center gap-3">
+                {/* Left: mnemonic + value + metadata */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-[13px] font-bold font-mono text-foreground/40 uppercase tracking-wider shrink-0">
+                      {d.mnemonic}
+                    </span>
+                    <span className="text-[17px] font-bold font-mono text-foreground truncate">
+                      {d.packet}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="text-[12px] font-mono text-foreground/30">{d.datetime}</span>
+                    <span className="text-[12px] font-mono font-bold text-accent">CONF:{d.conf}</span>
+                    <span className="text-[12px] font-mono text-foreground/40">O:{d.O}</span>
+                    <span className="text-[12px] font-mono text-foreground/40">L:{d.L}</span>
+                  </div>
+                </div>
+                {/* Right: seconds AGO — single line, vertically centered */}
+                <span className="text-[22px] font-bold text-accent whitespace-nowrap shrink-0 tabular-nums leading-none">
                   {d.secsAgo}s AGO
                 </span>
-                {/* Row 2 spans all 3 cols */}
-                <div className="col-span-3 flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-foreground/30">{d.datetime}</span>
-                  <span className="text-[10px] font-mono font-bold text-accent">CONF:{d.conf}</span>
-                  <span className="text-[10px] font-mono text-foreground/40">O:{d.O}</span>
-                  <span className="text-[10px] font-mono text-foreground/40">L:{d.L}</span>
-                </div>
               </div>
             ))}
           </div>
