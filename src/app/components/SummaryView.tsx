@@ -15,7 +15,7 @@ const MONITORING_ALERTS: { label: string; message: string; severity: "critical" 
 ];
 
 function MonitoringAlerts() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   return (
     <div className="shrink-0 border-b border-border bg-destructive/5">
       <div className="flex items-center gap-2 px-3 py-1">
