@@ -106,9 +106,14 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
                     <span className="font-mono text-foreground/40" style={{ fontSize: "clamp(8px, 0.62vw, 12px)" }}>L:{d.L}</span>
                   </div>
                 </div>
-                {/* Right: seconds AGO — scales with panel width */}
-                <span className="font-bold text-accent whitespace-nowrap shrink-0 tabular-nums leading-none" style={{ fontSize: "clamp(13px, 1.15vw, 22px)" }}>
-                  {d.secsAgo}s AGO
+                {/* Right: time AGO — scales with panel width */}
+                <span className="whitespace-nowrap shrink-0 tabular-nums leading-none flex items-baseline gap-1">
+                  <span className="font-bold text-accent tabular-nums" style={{ fontSize: "clamp(10px, 0.87vw, 16px)" }}>
+                    {d.secsAgo < 60
+                      ? `${d.secsAgo}s`
+                      : `${Math.floor(d.secsAgo / 60)}m ${d.secsAgo % 60}s`}
+                  </span>
+                  <span className="font-mono text-foreground/40" style={{ fontSize: "clamp(9px, 0.7vw, 13px)" }}>ago</span>
                 </span>
               </div>
             ))}

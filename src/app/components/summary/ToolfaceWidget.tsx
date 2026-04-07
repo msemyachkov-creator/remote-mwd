@@ -352,7 +352,8 @@ export function ToolfaceWidget() {
   const outerRef = React.useRef<HTMLDivElement>(null);
   const gaugeWrapRef = React.useRef<HTMLDivElement>(null);
 
-  // Scale inner content when outer container is narrower than base design width
+  // Only scale DOWN when container is narrower than base design width.
+  // Above base width, fluid() handles scaling via vw — no transform needed.
   React.useEffect(() => {
     const el = outerRef.current;
     if (!el) return;
@@ -409,11 +410,14 @@ export function ToolfaceWidget() {
     {/* Inner: fixed design width, scaled down when container is narrower */}
     <div
       className="flex flex-col px-3 pt-1.5 pb-1 gap-0.5 relative"
-      style={{
+      style={scale < 1 ? {
         width: TOOLFACE_BASE_W,
-        height: scale < 1 ? `${100 / scale}%` : "100%",
-        transform: scale < 1 ? `scale(${scale})` : undefined,
+        height: `${100 / scale}%`,
+        transform: `scale(${scale})`,
         transformOrigin: "top left",
+      } : {
+        width: "100%",
+        height: "100%",
       }}
     >
       <div className="absolute inset-0 bg-radial-[circle_at_center,_var(--color-primary)_0%,_transparent_70%] opacity-[0.02] pointer-events-none" />
@@ -625,10 +629,11 @@ export function ToolfaceWidget() {
             </div>
           </div>
 
-          {/* AZM + INC + env — centered in remaining space */}
+          {/* MD + INC + AZM + env — centered in remaining space */}
           <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden" style={{ gap: fluid(6) }}>
-            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
-            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
+            <FeaturedNumeralWidget label="MD" value={activeWell.holeDepth.toLocaleString("en-US", { maximumFractionDigits: 0 })} unit={activeWell.unit} />
+            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(1)} unit="°" />
+            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(0)} unit="°" />
 
           <div className="flex flex-col" style={{ gap: fluid(3) }}>
             {[

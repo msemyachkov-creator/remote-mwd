@@ -107,17 +107,17 @@ export function HeaderBar({ lang, onLangChange, activePage, onPageChange, onMake
           <Cell>
             <span className="mwd-ribbon-label text-foreground/70">DRLP</span>
             <div className="flex items-baseline gap-0.5">
-              <span className="mwd-ribbon-value text-foreground tabular-nums">{activeWell.pressure.toLocaleString()}</span>
-              <span className="mwd-metric-unit text-muted-foreground">psi</span>
+              <span className="mwd-ribbon-value tabular-nums" style={{ color: "var(--chart-2)" }}>{activeWell.pressure.toLocaleString()}</span>
+              <span className="mwd-metric-unit" style={{ color: "var(--chart-2)", opacity: 0.6 }}>psi</span>
             </div>
           </Cell>
           <Cell>
             <span className="mwd-ribbon-label text-foreground/70">ANNP</span>
             <div className="flex items-baseline gap-0.5">
-              <span className="mwd-ribbon-value text-foreground tabular-nums">
+              <span className="mwd-ribbon-value tabular-nums" style={{ color: "var(--chart-2)" }}>
                 {Math.round(activeWell.pressure * 0.62 + activeWell.seed % 80).toLocaleString()}
               </span>
-              <span className="mwd-metric-unit text-muted-foreground">psi</span>
+              <span className="mwd-metric-unit" style={{ color: "var(--chart-2)", opacity: 0.6 }}>psi</span>
             </div>
           </Cell>
           <Cell highlight>
@@ -126,11 +126,71 @@ export function HeaderBar({ lang, onLangChange, activePage, onPageChange, onMake
           </Cell>
           <Cell>
             <span className="mwd-ribbon-label text-foreground/70">{t("header_recording")}</span>
-            <span className="mwd-ribbon-value text-muted-foreground">{t("header_off")}</span>
+            <span className="mwd-ribbon-value" style={{ color: "var(--destructive)" }}>{t("header_off")}</span>
           </Cell>
           <Cell>
             <span className="mwd-ribbon-label text-foreground/70">{t("header_pulse_mode")}</span>
             <span className="mwd-ribbon-value" style={{ color: "var(--accent)" }}>{t("header_auto")}</span>
+          </Cell>
+          <Cell>
+            <span className="mwd-ribbon-label text-foreground/70">VIB</span>
+            <div className="flex items-baseline gap-0.5">
+              <span
+                className="mwd-ribbon-value tabular-nums"
+                style={{
+                  color: (activeWell.seed % 30) > 20
+                    ? "var(--destructive)"
+                    : (activeWell.seed % 30) > 10
+                      ? "#eab308"
+                      : "var(--chart-2)",
+                }}
+              >
+                {activeWell.seed % 30}
+              </span>
+              <span
+                className="mwd-metric-unit"
+                style={{
+                  color: (activeWell.seed % 30) > 20
+                    ? "var(--destructive)"
+                    : (activeWell.seed % 30) > 10
+                      ? "#eab308"
+                      : "var(--chart-2)",
+                  opacity: 0.7,
+                }}
+              >
+                g
+              </span>
+            </div>
+          </Cell>
+          <Cell>
+            <span className="mwd-ribbon-label text-foreground/70">TEMP</span>
+            <div className="flex items-baseline gap-0.5">
+              <span
+                className="mwd-ribbon-value tabular-nums"
+                style={{
+                  color: activeWell.temp > 130
+                    ? "var(--destructive)"
+                    : activeWell.temp > 100
+                      ? "#eab308"
+                      : "var(--chart-2)",
+                }}
+              >
+                {activeWell.temp.toFixed(1)}
+              </span>
+              <span
+                className="mwd-metric-unit"
+                style={{
+                  color: activeWell.temp > 130
+                    ? "var(--destructive)"
+                    : activeWell.temp > 100
+                      ? "#eab308"
+                      : "var(--chart-2)",
+                  opacity: 0.7,
+                }}
+              >
+                °C
+              </span>
+            </div>
           </Cell>
 
           {/* Depth values */}
