@@ -614,11 +614,11 @@ export function ToolfaceWidget() {
         {/* fluid gap right */}
         <div style={{ width: fluid(2), flexShrink: 0 }} />
 
-        {/* Right column: GTF/MTF toggle + AZM + INC featured + env widgets
-            height = gaugeSize so column scales 1:1 with the circular gauge */}
+        {/* Right column: GTF/MTF toggle + MD + INC + AZM + env widgets
+            self-stretch so it fills the full middle-row height — content always visible */}
         <div
-          className="flex flex-col shrink-0 mr-2 z-10 overflow-hidden"
-          style={{ width: fluid(245), height: gaugeSize, paddingTop: fluid(8) }}
+          className="flex flex-col shrink-0 self-stretch mr-2 z-10 overflow-hidden"
+          style={{ width: fluid(245), paddingTop: fluid(8) }}
         >
           {/* GTF/MTF switcher — pinned to top with gap from DRILLING row above */}
           <div className="flex justify-end shrink-0">
@@ -630,50 +630,58 @@ export function ToolfaceWidget() {
           </div>
 
           {/* MD + INC + AZM + env — centered in remaining space */}
-          <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden" style={{ gap: fluid(6) }}>
-            <FeaturedNumeralWidget label="MD" value={activeWell.holeDepth.toLocaleString("en-US", { maximumFractionDigits: 0 })} unit={activeWell.unit} />
-            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(1)} unit="°" />
-            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(0)} unit="°" />
+          <div className="flex-1 flex flex-col justify-center min-h-0">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: fluid(6),
+              }}
+            >
+              <FeaturedNumeralWidget label="MD" value={activeWell.holeDepth.toLocaleString("en-US", { maximumFractionDigits: 0 })} unit={activeWell.unit} />
+              <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(1)} unit="°" />
+              <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(0)} unit="°" />
 
-          <div className="flex flex-col" style={{ gap: fluid(3) }}>
-            {[
-              { label: "B Field",    value: bField,                                                      unit: "nT"   },
-              { label: "Dip",        value: dip,                                                         unit: "°"    },
-              { label: "G Field",    value: gField,                                                      unit: "G"    },
-              { label: "Temp",       value: envTemp,                                                     unit: "°C"   },
-              { label: "WOB",        value: (12 + activeWell.seed % 8).toFixed(1),                      unit: "klbf" },
-              { label: "Hook Load",  value: (180 + activeWell.seed % 40).toFixed(0),                    unit: "klbf" },
-            ].map(({ label, value, unit }) => (
-              <div
-                key={label}
-                className="flex items-center bg-secondary/20 border border-border/20 rounded"
-                style={{
-                  gap: fluid(8),
-                  padding: `${fluid(4)} ${fluid(10)}`,
-                  borderRadius: "var(--radius)",
-                }}
-              >
-                <span
-                  className="text-foreground/50 shrink-0"
-                  style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)", fontWeight: 500, minWidth: fluid(52) }}
-                >
-                  {label}
-                </span>
-                <span
-                  className="font-mono font-semibold text-foreground/80 tabular-nums ml-auto"
-                  style={{ fontSize: fluid(14) }}
-                >
-                  {value}
-                </span>
-                <span
-                  className="text-muted-foreground shrink-0"
-                  style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)" }}
-                >
-                  {unit}
-                </span>
+              <div className="flex flex-col" style={{ gap: fluid(3) }}>
+                {[
+                  { label: "B Field",    value: bField,                                                      unit: "nT"   },
+                  { label: "Dip",        value: dip,                                                         unit: "°"    },
+                  { label: "G Field",    value: gField,                                                      unit: "G"    },
+                  { label: "Temp",       value: envTemp,                                                     unit: "°C"   },
+                  { label: "WOB",        value: (12 + activeWell.seed % 8).toFixed(1),                      unit: "klbf" },
+                  { label: "Hook Load",  value: (180 + activeWell.seed % 40).toFixed(0),                    unit: "klbf" },
+                ].map(({ label, value, unit }) => (
+                  <div
+                    key={label}
+                    className="flex items-center bg-secondary/20 border border-border/20 rounded"
+                    style={{
+                      gap: fluid(8),
+                      padding: `${fluid(4)} ${fluid(10)}`,
+                      borderRadius: "var(--radius)",
+                    }}
+                  >
+                    <span
+                      className="text-foreground/50 shrink-0"
+                      style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)", fontWeight: 500, minWidth: fluid(52) }}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className="font-mono font-semibold text-foreground/80 tabular-nums ml-auto"
+                      style={{ fontSize: fluid(14) }}
+                    >
+                      {value}
+                    </span>
+                    <span
+                      className="text-muted-foreground shrink-0"
+                      style={{ fontSize: fluid(10), fontFamily: "var(--font-family-base)" }}
+                    >
+                      {unit}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
           </div>{/* end centered inner group */}
         </div>
 

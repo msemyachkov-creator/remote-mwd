@@ -35,6 +35,27 @@ const BOX_STATUS_BORDER: Record<string, string> = {
   offline: "var(--muted-foreground)",
 };
 
+// ─── Report status helpers ─────────────────────────────────────────────────
+type ReportStatus = "sent" | "sending" | "not_sent" | "failed";
+
+function getReportStatus(seed: number): ReportStatus {
+  const statuses: ReportStatus[] = ["sent", "sending", "not_sent", "failed"];
+  return statuses[seed % 4];
+}
+
+function getReportTime(seed: number): string {
+  const mins = [2, 7, 14, 31, 58];
+  const m = mins[seed % mins.length];
+  return m < 60 ? `${m}m ago` : `${Math.floor(m / 60)}h ago`;
+}
+
+const REPORT_STATUS_CFG: Record<ReportStatus, { label: string; color: string; dot?: string }> = {
+  sent:     { label: "Sent",     color: "var(--chart-2)"         },
+  sending:  { label: "Sending",  color: "#eab308",        dot: "animate-pulse" },
+  not_sent: { label: "Not sent", color: "var(--muted-foreground)" },
+  failed:   { label: "Failed",   color: "var(--destructive)"      },
+};
+
 export function Sidebar({ activePage, onPageChange }: SidebarProps) {
   const { wells, activeWellId, setActiveWellId, rigs, wellEntries, renameRig } = useWell();
   const [searchQuery, setSearchQuery] = useState("");
@@ -335,38 +356,54 @@ export function Sidebar({ activePage, onPageChange }: SidebarProps) {
                         ↳ {activeRunInfo.wellName} · Run {activeRunInfo.runNumber}
                       </span>
                     )}
-                    {/* Row 4: Bit + Hole */}
+                    {/* Row 4: MD · Inc · AZ on one line */}
                     <div
-                      className="flex gap-2"
+                      className="flex gap-2 flex-wrap"
                       style={{ fontSize: "10px", fontFamily: "var(--font-family-base)" }}
                     >
-                      <span>
-                        <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>Bit</span>
-                        {" "}<span className="tabular-nums text-foreground/80">{latest.bitDepth.toLocaleString()}</span>
-                        {" "}<span className="text-foreground/40">{latest.unit}</span>
-                      </span>
-                      <span>
-                        <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>Hole</span>
+                      <span className="whitespace-nowrap">
+                        <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>MD</span>
                         {" "}<span className="tabular-nums text-foreground/80">{latest.holeDepth.toLocaleString()}</span>
                         {" "}<span className="text-foreground/40">{latest.unit}</span>
                       </span>
-                    </div>
-                    {/* Row 5: AZ + INC */}
-                    <div
-                      className="flex gap-2"
-                      style={{ fontSize: "10px", fontFamily: "var(--font-family-base)" }}
-                    >
-                      <span>
+                      <span className="whitespace-nowrap">
+                        <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>Inc</span>
+                        {" "}<span className="tabular-nums text-foreground/80">{latest.inc.toFixed(2)}</span>
+                        <span className="text-foreground/40">°</span>
+                      </span>
+                      <span className="whitespace-nowrap">
                         <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>AZ</span>
                         {" "}<span className="tabular-nums text-foreground/80">{latest.azm.toFixed(2)}</span>
                         <span className="text-foreground/40">°</span>
                       </span>
-                      <span>
-                        <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>INC</span>
-                        {" "}<span className="tabular-nums text-foreground/80">{latest.inc.toFixed(2)}</span>
-                        <span className="text-foreground/40">°</span>
-                      </span>
                     </div>
+                    {/* Row 5: Bit + Report status */}
+                    {(() => {
+                      const status = getReportStatus(latest.seed);
+                      const cfg = REPORT_STATUS_CFG[status];
+                      return (
+                        <div
+                          className="flex items-center justify-between gap-1"
+                          style={{ fontSize: "10px", fontFamily: "var(--font-family-base)" }}
+                        >
+                          <span className="whitespace-nowrap">
+                            <span className="text-muted-foreground" style={{ fontWeight: "var(--font-weight-medium)" }}>Bit</span>
+                            {" "}<span className="tabular-nums text-foreground/80">{latest.bitDepth.toLocaleString()}</span>
+                            {" "}<span className="text-foreground/40">{latest.unit}</span>
+                          </span>
+                          <span className="flex items-center gap-1 shrink-0">
+                            <span
+                              className={`inline-block size-1.5 rounded-full ${cfg.dot ?? ""}`}
+                              style={{ backgroundColor: cfg.color }}
+                            />
+                            <span style={{ color: cfg.color, fontWeight: 500 }}>{cfg.label}</span>
+                            {status === "sent" && (
+                              <span className="text-foreground/30">{getReportTime(latest.seed)}</span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })()}
                     </div>{/* closes content flex col */}
                   </div>{/* closes header flex row */}
 
