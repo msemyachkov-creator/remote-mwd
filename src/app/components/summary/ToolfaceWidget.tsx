@@ -575,18 +575,19 @@ export function ToolfaceWidget() {
         {/* fluid gap right */}
         <div style={{ width: fluid(2), flexShrink: 0 }} />
 
-        {/* Tab switcher — absolute top-right of middle block */}
-        <div className="absolute top-[20px] right-2 z-20 flex border border-primary/30 rounded overflow-hidden bg-primary/5">
-          <button className={`${tabBase} ${activeGauge === "gtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("gtf")}>GTF</button>
-          <div className="w-px bg-primary/20 self-stretch" />
-          <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
-        </div>
-
-        {/* Right column: AZM + INC featured + env widgets */}
+        {/* Right column: GTF/MTF toggle + AZM + INC featured + env widgets */}
         <div
           className="flex flex-col shrink-0 mr-2 z-10"
           style={{ gap: fluid(6), width: fluid(245) }}
         >
+          {/* GTF/MTF switcher — top of right column, aligned right, min gap to AZM via column gap */}
+          <div className="flex justify-end shrink-0">
+            <div className="flex border border-primary/30 rounded overflow-hidden bg-primary/5">
+              <button className={`${tabBase} ${activeGauge === "gtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("gtf")}>GTF</button>
+              <div className="w-px bg-primary/20 self-stretch" />
+              <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
+            </div>
+          </div>
           <div className="flex flex-col shrink-0" style={{ gap: fluid(6) }}>
             <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
             <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
