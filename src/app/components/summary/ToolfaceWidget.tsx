@@ -575,12 +575,14 @@ export function ToolfaceWidget() {
         {/* fluid gap right */}
         <div style={{ width: fluid(2), flexShrink: 0 }} />
 
-        {/* Right column: GTF/MTF toggle + AZM + INC featured + env widgets */}
+        {/* Right column: GTF/MTF toggle + AZM + INC featured + env widgets
+            height = gaugeSize so column scales 1:1 with the circular gauge */}
         <div
-          className="flex flex-col shrink-0 mr-2 z-10"
-          style={{ gap: fluid(6), width: fluid(245) }}
+          className="flex flex-col shrink-0 mr-2 z-10 overflow-hidden"
+          style={{ gap: fluid(6), width: fluid(245), height: gaugeSize, paddingTop: fluid(8) }}
         >
-          {/* GTF/MTF switcher — top of right column, aligned right, min gap to AZM via column gap */}
+          {/* GTF/MTF switcher — in-flow at top, padded from DRILLING row above.
+              Being in-flow means it can never overlap AZM/INC below it. */}
           <div className="flex justify-end shrink-0">
             <div className="flex border border-primary/30 rounded overflow-hidden bg-primary/5">
               <button className={`${tabBase} ${activeGauge === "gtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("gtf")}>GTF</button>
@@ -588,10 +590,9 @@ export function ToolfaceWidget() {
               <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
             </div>
           </div>
-          <div className="flex flex-col shrink-0" style={{ gap: fluid(6) }}>
-            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
-            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
-          </div>
+          <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
+          <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
+
           <div className="flex flex-col" style={{ gap: fluid(3) }}>
             {[
               { label: "B Field",    value: bField,                                                      unit: "nT"   },
