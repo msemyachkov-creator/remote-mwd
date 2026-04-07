@@ -190,7 +190,9 @@ export function HeaderBar({ lang, onLangChange, activePage, onPageChange, onMake
             className={`mwd-btn relative flex items-center px-2.5 h-[24px] rounded transition-colors mr-1 ${
               activePage === item.id
                 ? "text-primary bg-primary/10"
-                : "text-foreground bg-secondary/50 hover:bg-secondary hover:text-foreground"
+                : item.id === "summary"
+                  ? "text-primary font-semibold bg-primary/15 hover:bg-primary/25"
+                  : "text-foreground bg-secondary/50 hover:bg-secondary hover:text-foreground"
             }`}
           >
             {item.label}
