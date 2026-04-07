@@ -338,17 +338,39 @@ function StatusBadge({ children, color }: { children: React.ReactNode; color?: s
   );
 }
 
+// Fixed design width of the inner layout (px at 1920px viewport).
+// fluid() minimums don't shrink below 1920px, so we scale via CSS transform.
+const TOOLFACE_BASE_W = 1218;
+
 export function ToolfaceWidget() {
   const fluid = useFluid();
   const { t } = useI18n();
   const { activeWell } = useWell();
   const [activeGauge, setActiveGauge] = React.useState<"gtf" | "mtf">("gtf");
   const [gaugeSize, setGaugeSize] = React.useState(300);
-  const middleRowRef = React.useRef<HTMLDivElement>(null);
+  const [scale, setScale] = React.useState(1);
+  const outerRef = React.useRef<HTMLDivElement>(null);
+  const gaugeWrapRef = React.useRef<HTMLDivElement>(null);
+
+  // Scale inner content when outer container is narrower than base design width
   React.useEffect(() => {
-    const el = middleRowRef.current;
+    const el = outerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setGaugeSize(entry.contentRect.height));
+    const ro = new ResizeObserver(([entry]) => {
+      setScale(Math.min(1, entry.contentRect.width / TOOLFACE_BASE_W));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // gaugeSize = min(flex-1 wrapper width, height) — square fits without overflow
+  React.useEffect(() => {
+    const el = gaugeWrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setGaugeSize(Math.min(width, height));
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -382,7 +404,18 @@ export function ToolfaceWidget() {
   const tabInactive = "text-primary/40 hover:bg-primary/10 hover:text-primary/60";
 
   return (
-    <div className="flex-1 flex flex-col px-3 pt-1.5 pb-1 gap-0.5 bg-background relative overflow-hidden select-none">
+    // Outer: measures available width, clips overflow
+    <div ref={outerRef} className="flex-1 relative overflow-hidden bg-background select-none">
+    {/* Inner: fixed design width, scaled down when container is narrower */}
+    <div
+      className="flex flex-col px-3 pt-1.5 pb-1 gap-0.5 relative"
+      style={{
+        width: TOOLFACE_BASE_W,
+        height: scale < 1 ? `${100 / scale}%` : "100%",
+        transform: scale < 1 ? `scale(${scale})` : undefined,
+        transformOrigin: "top left",
+      }}
+    >
       <div className="absolute inset-0 bg-radial-[circle_at_center,_var(--color-primary)_0%,_transparent_70%] opacity-[0.02] pointer-events-none" />
 
       {/* TOP ROW — status badges + numerals */}
@@ -411,7 +444,7 @@ export function ToolfaceWidget() {
       </div>
 
       {/* MIDDLE — flex row: data card | left col | gap | gauge | gap | right col */}
-      <div ref={middleRowRef} className="flex-1 flex items-center min-h-0 relative">
+      <div className="flex-1 flex items-center min-h-0 relative">
 
         {/* Summary data card — left vertical panel */}
         <div
@@ -565,10 +598,12 @@ export function ToolfaceWidget() {
         {/* fluid gap left */}
         <div style={{ width: fluid(2), flexShrink: 0 }} />
 
-        {/* Gauge — exact square (width = measured row height) → no horizontal dead zones */}
-        <div className="relative shrink-0" style={{ width: gaugeSize, height: gaugeSize }}>
-          <div className="absolute inset-0">
-            <PolarChartWidget label={gaugeLabel} gtfAngle={gaugeAngle} gtfValue={gaugeAngle} timestamp="00:56" />
+        {/* Gauge — flex-1 flex wrapper, measures min(width,height) for square */}
+        <div ref={gaugeWrapRef} className="flex-1 self-stretch flex items-center justify-center min-w-0 overflow-hidden">
+          <div className="relative shrink-0" style={{ width: gaugeSize, height: gaugeSize }}>
+            <div className="absolute inset-0">
+              <PolarChartWidget label={gaugeLabel} gtfAngle={gaugeAngle} gtfValue={gaugeAngle} timestamp="00:56" />
+            </div>
           </div>
         </div>
 
@@ -635,7 +670,7 @@ export function ToolfaceWidget() {
         </div>
 
       </div>
-
+    </div>
     </div>
   );
 }
