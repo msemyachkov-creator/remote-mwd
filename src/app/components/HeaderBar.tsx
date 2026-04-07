@@ -191,7 +191,7 @@ export function HeaderBar({ lang, onLangChange, activePage, onPageChange, onMake
               activePage === item.id
                 ? "text-primary bg-primary/10"
                 : item.id === "summary"
-                  ? "text-primary font-semibold bg-primary/15 hover:bg-primary/25"
+                  ? "text-primary/70 border border-primary/30 hover:border-primary/50 hover:text-primary"
                   : "text-foreground bg-secondary/50 hover:bg-secondary hover:text-foreground"
             }`}
           >
