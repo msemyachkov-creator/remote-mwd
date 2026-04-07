@@ -250,7 +250,7 @@ export function PulseView({ actions }: PulseViewProps = {}) {
   }, []);
 
   return (
-    <div className="h-80 border-t border-border bg-background flex flex-col">
+    <div className="border-t border-border bg-background flex flex-col" style={{ height: "clamp(160px, 25vh, 320px)" }}>
       {/* Header */}
       <div className="px-4 py-2 border-b border-border bg-secondary/10 flex items-center justify-between shrink-0">
         <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/60">

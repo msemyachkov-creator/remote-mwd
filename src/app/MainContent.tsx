@@ -519,8 +519,10 @@ function MWDAppContent({ lang, onLangChange }: { lang: Lang; onLangChange: (l: L
               <DataView mwdData={activeMwdData} />
             </div>
           ) : activePage === "summary" ? (
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <SummaryView mwdData={activeMwdData} />
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex flex-col" style={{ minHeight: 640, height: "100%" }}>
+                <SummaryView mwdData={activeMwdData} />
+              </div>
             </div>
           ) : activePage === "config" ? (
             <div className="flex-1 min-h-0 overflow-hidden">
