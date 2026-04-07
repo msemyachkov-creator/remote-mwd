@@ -262,8 +262,8 @@ function FeaturedNumeralWidget({ label, value, unit }: { label: string; value: s
         border: "1px solid color-mix(in srgb, var(--primary) 35%, transparent)",
         borderLeft: `${fluid(3)} solid var(--primary)`,
         borderRadius: "var(--radius)",
-        padding: `${fluid(5)} ${fluid(12)}`,
-        gap: fluid(1),
+        padding: `${fluid(8)} ${fluid(12)}`,
+        gap: fluid(2),
       }}
     >
       <div
@@ -272,20 +272,20 @@ function FeaturedNumeralWidget({ label, value, unit }: { label: string; value: s
       />
       <span
         className="uppercase tracking-widest text-foreground/50 z-10"
-        style={{ fontSize: fluid(9), fontFamily: "var(--font-family-base)", fontWeight: 700 }}
+        style={{ fontSize: fluid(15), fontFamily: "var(--font-family-base)", fontWeight: 700 }}
       >
         {label}
       </span>
       <div className="flex items-baseline z-10" style={{ gap: fluid(3) }}>
         <span
           className="font-mono font-bold leading-none tabular-nums"
-          style={{ fontSize: fluid(22), color: "var(--primary)", letterSpacing: "-0.02em" }}
+          style={{ fontSize: fluid(37), color: "var(--primary)", letterSpacing: "-0.02em" }}
         >
           {value}
         </span>
         <span
           className="font-mono"
-          style={{ fontSize: fluid(11), color: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
+          style={{ fontSize: fluid(19), color: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
         >
           {unit}
         </span>
@@ -614,10 +614,9 @@ export function ToolfaceWidget() {
             height = gaugeSize so column scales 1:1 with the circular gauge */}
         <div
           className="flex flex-col shrink-0 mr-2 z-10 overflow-hidden"
-          style={{ gap: fluid(6), width: fluid(245), height: gaugeSize, justifyContent: "center" }}
+          style={{ width: fluid(245), height: gaugeSize, paddingTop: fluid(8) }}
         >
-          {/* GTF/MTF switcher — in-flow at top, padded from DRILLING row above.
-              Being in-flow means it can never overlap AZM/INC below it. */}
+          {/* GTF/MTF switcher — pinned to top with gap from DRILLING row above */}
           <div className="flex justify-end shrink-0">
             <div className="flex border border-primary/30 rounded overflow-hidden bg-primary/5">
               <button className={`${tabBase} ${activeGauge === "gtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("gtf")}>GTF</button>
@@ -625,8 +624,11 @@ export function ToolfaceWidget() {
               <button className={`${tabBase} ${activeGauge === "mtf" ? tabActive : tabInactive}`} onClick={() => setActiveGauge("mtf")}>MTF</button>
             </div>
           </div>
-          <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
-          <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
+
+          {/* AZM + INC + env — centered in remaining space */}
+          <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden" style={{ gap: fluid(6) }}>
+            <FeaturedNumeralWidget label={t("sum_azm")} value={azmValue.toFixed(2)} unit="°" />
+            <FeaturedNumeralWidget label={t("sum_inc")} value={incValue.toFixed(2)} unit="°" />
 
           <div className="flex flex-col" style={{ gap: fluid(3) }}>
             {[
@@ -667,6 +669,7 @@ export function ToolfaceWidget() {
               </div>
             ))}
           </div>
+          </div>{/* end centered inner group */}
         </div>
 
       </div>
