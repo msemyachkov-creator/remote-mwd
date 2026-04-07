@@ -256,14 +256,14 @@ function FeaturedNumeralWidget({ label, value, unit }: { label: string; value: s
   const fluid = useFluid();
   return (
     <div
-      className="flex-1 flex flex-col justify-center relative overflow-hidden"
+      className="shrink-0 flex flex-col justify-center relative overflow-hidden"
       style={{
         background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), color-mix(in srgb, var(--primary) 4%, transparent))",
         border: "1px solid color-mix(in srgb, var(--primary) 35%, transparent)",
         borderLeft: `${fluid(3)} solid var(--primary)`,
         borderRadius: "var(--radius)",
-        padding: `${fluid(8)} ${fluid(12)}`,
-        gap: fluid(2),
+        padding: `${fluid(5)} ${fluid(12)}`,
+        gap: fluid(1),
       }}
     >
       <div
@@ -279,13 +279,13 @@ function FeaturedNumeralWidget({ label, value, unit }: { label: string; value: s
       <div className="flex items-baseline z-10" style={{ gap: fluid(3) }}>
         <span
           className="font-mono font-bold leading-none tabular-nums"
-          style={{ fontSize: fluid(30), color: "var(--primary)", letterSpacing: "-0.02em" }}
+          style={{ fontSize: fluid(22), color: "var(--primary)", letterSpacing: "-0.02em" }}
         >
           {value}
         </span>
         <span
           className="font-mono"
-          style={{ fontSize: fluid(13), color: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
+          style={{ fontSize: fluid(11), color: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
         >
           {unit}
         </span>
@@ -614,7 +614,7 @@ export function ToolfaceWidget() {
             height = gaugeSize so column scales 1:1 with the circular gauge */}
         <div
           className="flex flex-col shrink-0 mr-2 z-10 overflow-hidden"
-          style={{ gap: fluid(6), width: fluid(245), height: gaugeSize, paddingTop: fluid(8) }}
+          style={{ gap: fluid(6), width: fluid(245), height: gaugeSize, justifyContent: "center" }}
         >
           {/* GTF/MTF switcher — in-flow at top, padded from DRILLING row above.
               Being in-flow means it can never overlap AZM/INC below it. */}
