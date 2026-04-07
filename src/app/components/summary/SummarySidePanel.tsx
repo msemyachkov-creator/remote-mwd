@@ -51,7 +51,7 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
   ], [activeWell]);
 
   return (
-    <div className="w-[440px] border-l border-border bg-background flex flex-col h-full shrink-0">
+    <div className="border-l border-border bg-background flex flex-col h-full shrink-0" style={{ width: "clamp(260px, 23vw, 440px)" }}>
       {/* Tabs */}
       <div className="flex border-b border-border bg-secondary/5 h-10">
         {[
@@ -62,11 +62,12 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
           <button
             key={`side-tab-${tab.id}`}
             onClick={() => setActiveTab(tab.id as Tab)}
-            className={`flex-1 flex items-center justify-center text-[12px] font-bold tracking-tight transition-all relative ${
+            className={`flex-1 flex items-center justify-center font-bold tracking-tight transition-all relative ${
               activeTab === tab.id
                 ? "text-primary bg-background"
                 : "text-foreground/40 hover:text-foreground/70"
             }`}
+            style={{ fontSize: "clamp(9px, 0.65vw, 12px)" }}
           >
             {tab.label}
             {activeTab === tab.id && (
@@ -87,26 +88,26 @@ export function SummarySidePanel({ actions }: SummarySidePanelProps = {}) {
         {activeTab === "decodes" && (
           <div className="divide-y divide-border">
             {decodes.map((d, i) => (
-              <div key={i} className="px-4 py-2.5 hover:bg-secondary/10 transition-colors flex items-center gap-3">
+              <div key={i} className="hover:bg-secondary/10 transition-colors flex items-center" style={{ padding: "clamp(4px, 0.5vh, 10px) clamp(8px, 0.8vw, 16px)", gap: "clamp(6px, 0.6vw, 12px)" }}>
                 {/* Left: mnemonic + value + metadata */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-[13px] font-bold font-mono text-foreground/40 uppercase tracking-wider shrink-0">
+                  <div className="flex items-baseline" style={{ gap: "clamp(4px, 0.4vw, 8px)" }}>
+                    <span className="font-bold font-mono text-foreground/40 uppercase tracking-wider shrink-0" style={{ fontSize: "clamp(9px, 0.68vw, 13px)" }}>
                       {d.mnemonic}
                     </span>
-                    <span className="text-[17px] font-bold font-mono text-foreground truncate">
+                    <span className="font-bold font-mono text-foreground truncate" style={{ fontSize: "clamp(11px, 0.88vw, 17px)" }}>
                       {d.packet}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[12px] font-mono text-foreground/30">{d.datetime}</span>
-                    <span className="text-[12px] font-mono font-bold text-accent">CONF:{d.conf}</span>
-                    <span className="text-[12px] font-mono text-foreground/40">O:{d.O}</span>
-                    <span className="text-[12px] font-mono text-foreground/40">L:{d.L}</span>
+                  <div className="flex items-center" style={{ gap: "clamp(4px, 0.5vw, 12px)", marginTop: "clamp(1px, 0.1vh, 2px)" }}>
+                    <span className="font-mono text-foreground/30" style={{ fontSize: "clamp(8px, 0.62vw, 12px)" }}>{d.datetime}</span>
+                    <span className="font-mono font-bold text-accent" style={{ fontSize: "clamp(8px, 0.62vw, 12px)" }}>CONF:{d.conf}</span>
+                    <span className="font-mono text-foreground/40" style={{ fontSize: "clamp(8px, 0.62vw, 12px)" }}>O:{d.O}</span>
+                    <span className="font-mono text-foreground/40" style={{ fontSize: "clamp(8px, 0.62vw, 12px)" }}>L:{d.L}</span>
                   </div>
                 </div>
-                {/* Right: seconds AGO — single line, vertically centered */}
-                <span className="text-[22px] font-bold text-accent whitespace-nowrap shrink-0 tabular-nums leading-none">
+                {/* Right: seconds AGO — scales with panel width */}
+                <span className="font-bold text-accent whitespace-nowrap shrink-0 tabular-nums leading-none" style={{ fontSize: "clamp(13px, 1.15vw, 22px)" }}>
                   {d.secsAgo}s AGO
                 </span>
               </div>
